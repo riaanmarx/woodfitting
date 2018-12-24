@@ -233,6 +233,7 @@ namespace WoodFitting2.Packer_v1
 
                 #region // replace the used board with 2 overlapping remainder pieces after subtracting the part ...
                 // divide the board into two overlapping remainder sections
+                boards.Remove(iBoard);
                 BoardNode boardSection1 = null;
                 double l = iBoard.Length - iPart.Length - sawkerf;
                 if (l * iBoard.Width >= newParts.Head.Area)
@@ -249,7 +250,7 @@ namespace WoodFitting2.Packer_v1
                     boardSection2.AssociatedBoard = boardSection1;
                     if (boardSection1 != null) boardSection1.AssociatedBoard = boardSection2;
                 }
-                boards.Remove(iBoard);
+                
                 #endregion
 
                 #region // pack the remaining parts on the remaining boards ...
@@ -263,7 +264,15 @@ namespace WoodFitting2.Packer_v1
                 if (boardSection2 != null) boards.Remove(boardSection2);
 
                 // place the board back
-                boards.InsertItemSortedbyAreaAsc(iBoard);
+                if (iBoard.Prev == null)
+                    boards.Head = iBoard;
+                else
+                    iBoard.Prev.Next = iBoard;
+                if (iBoard.Next == null)
+                    boards.Tail = iBoard;
+                else
+                    iBoard.Next.Prev = iBoard;
+                boards.Count++;
 
                 // remove the current part from the list so we can try the next one
                 TemporarySolution.Remove(PackedPart);
