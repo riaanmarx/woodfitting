@@ -133,7 +133,7 @@ namespace WoodFitting2.Packer_v1
 
         private void Pack_recursive(PartList parts, BoardList boards, PartList packedParts, double packedPartsArea)
         {
-            
+
             // loop through remaining parts
             for (PartNode iPart = parts.Head; iPart != null; iPart = iPart.Next)
             {
@@ -146,10 +146,10 @@ namespace WoodFitting2.Packer_v1
                 // if the previous part was the same size, pass this one - we already completed this iteration
                 if (iPart != parts.Head && iPart.Length == iPart.Prev.Length && iPart.Width == iPart.Prev.Width)
                     continue;
-                               
+                #endregion
 
-
-                // find first board that will accomodate the part ...
+                #region // Find first board that will fit the part ...
+                // find first board that will accomodate the part
                 BoardNode iBoard = boards.Head;
                 while (iBoard != null && iPart.Area > iBoard.Area) iBoard = iBoard.Next;
                 if (iBoard == null)
@@ -157,18 +157,19 @@ namespace WoodFitting2.Packer_v1
 
                 while (iBoard != null && (iPart.Length > iBoard.Length || iPart.Width > iBoard.Width)) iBoard = iBoard.Next;
                 if (iBoard == null)
-                    continue; // if this part cannot fit any board, continue to next part ...
+                    continue; // if this part cannot fit any board, continue to next part
+
                 #endregion
 
                 #region // place the part ...
                 //append the part to the list of packed parts
-                PartNode currentpart = new PartNode(iPart)
+                PartNode PackedPart = new PartNode(iPart)
                 {
                     Container = iBoard.ID,
                     dWidth = iBoard.dWidth,
                     dLength = iBoard.dLength
                 };
-                packedParts.Append(currentpart);
+                packedParts.Append(PackedPart);
                 #endregion
 
                 #region // store best solution ...
@@ -181,91 +182,92 @@ namespace WoodFitting2.Packer_v1
                 #endregion
 
                 #region // pack rmaining parts onto remaining board segmnts ...
+                
                 // if there are more parts, pack them too
-                if (parts.Count > 1)
+                if (parts.Count == 1) break;
+                
+                // if the board section used has a buddy from a previous placement, adjust the buddy and break the association
+                if (iBoard.AssociatedBoard != null)
                 {
-                    // if the board section used has a buddy from a previous placement, adjust the buddy and break the association
-                    if (iBoard.AssociatedBoard != null)
+                    //we have to adjust the buddy, so as not to place another part on the overlapping area
+                    if (iBoard.dWidth < iBoard.AssociatedBoard.dWidth)
                     {
-                        //we have to adjust the buddy, so as not to place another part on the overlapping area
-                        if (iBoard.dWidth < iBoard.AssociatedBoard.dWidth)
-                        {
-                            //if this is Rem1
-                            //if the part is wider than the left portion of Rem1
-                            if (iBoard.dWidth + iPart.Width + sawkerf > iBoard.AssociatedBoard.dWidth)
-                                iBoard.AssociatedBoard.Length -= (iBoard.Length + sawkerf);
-                            else
-                                iBoard.Width -= (iBoard.AssociatedBoard.Width + sawkerf);
-                        }
+                        //if this is Rem1
+                        //if the part is wider than the left portion of Rem1
+                        if (iBoard.dWidth + iPart.Width + sawkerf > iBoard.AssociatedBoard.dWidth)
+                            iBoard.AssociatedBoard.Length -= (iBoard.Length + sawkerf);
                         else
-                        {
-                            //if this is Rem2
-                            if (iBoard.dLength + iPart.Length + sawkerf > iBoard.AssociatedBoard.dLength)
-                                iBoard.AssociatedBoard.Width -= (iBoard.Width + sawkerf);
-                            else
-                                iBoard.Length -= (iBoard.AssociatedBoard.Length + sawkerf);
-                        }
-
-                        //then break the pair
-                        iBoard.AssociatedBoard.AssociatedBoard = null;
-                        iBoard.AssociatedBoard = null;
-                    }
-
-                    // make my own copy of the list, minus the current part
-                    PartList newParts;
-                    if (iPart.Prev == null)
-                    {
-                        parts.Head = iPart.Next;
-                        newParts = new PartList(parts);
-                        parts.Head = iPart;
+                            iBoard.Width -= (iBoard.AssociatedBoard.Width + sawkerf);
                     }
                     else
                     {
-                        iPart.Prev.Next = iPart.Next;
-                        newParts = new PartList(parts);
-                        iPart.Prev.Next = iPart;
+                        //if this is Rem2
+                        if (iBoard.dLength + iPart.Length + sawkerf > iBoard.AssociatedBoard.dLength)
+                            iBoard.AssociatedBoard.Width -= (iBoard.Width + sawkerf);
+                        else
+                            iBoard.Length -= (iBoard.AssociatedBoard.Length + sawkerf);
                     }
-                    newParts.Count--;
 
-                    BoardList newBoards = new BoardList(boards);
+                    //then break the pair
+                    iBoard.AssociatedBoard.AssociatedBoard = null;
+                    iBoard.AssociatedBoard = null;
+                }
 
-                    // divide the board into two overlapping remainder sections
-                    BoardNode boardSection1 = null;
-                    double l = iBoard.Length - iPart.Length - sawkerf;
-                    if (l * iBoard.Width >= newParts.Head.Area)
-                    {
-                        boardSection1 = new BoardNode(iBoard.ID, l, iBoard.Width, iBoard.dLength + iPart.Length + sawkerf, iBoard.dWidth);
-                        newBoards.InsertItemSortedbyAreaAsc(boardSection1);
-                    }
-                    BoardNode boardSection2 = null;
-                    double w = iBoard.Width - iPart.Width - sawkerf;
-                    if (w * iBoard.Length >= newParts.Head.Area)
-                    {
-                        boardSection2 = new BoardNode(iBoard.ID, iBoard.Length, w, iBoard.dLength, iBoard.dWidth + iPart.Width + sawkerf);
-                        newBoards.InsertItemSortedbyAreaAsc(boardSection2);
-                        boardSection2.AssociatedBoard = boardSection1;
-                        if (boardSection1 != null) boardSection1.AssociatedBoard = boardSection2;
-                    }
-                    newBoards.Remove(iBoard);
+                // make my own copy of the list, minus the current part
+                PartList newParts;
+                if (iPart.Prev == null)
+                {
+                    parts.Head = iPart.Next;
+                    newParts = new PartList(parts);
+                    parts.Head = iPart;
+                }
+                else
+                {
+                    iPart.Prev.Next = iPart.Next;
+                    newParts = new PartList(parts);
+                    iPart.Prev.Next = iPart;
+                }
+                newParts.Count--;
 
-                    // remove board sections smaller than the smallest part
-                    //for (BoardNode i = boards.Head; i != null; i = i.Next) if (i.Area < parts.Head.Area) boards.Remove(i); else break;
+                BoardList newBoards = new BoardList(boards);
+                newBoards.Remove(iBoard.ID);
 
-                    
+                // divide the board into two overlapping remainder sections
+                BoardNode boardSection1 = null;
+                double l = iBoard.Length - iPart.Length - sawkerf;
+                if (l * iBoard.Width >= newParts.Head.Area)
+                {
+                    boardSection1 = new BoardNode(iBoard.ID, l, iBoard.Width, iBoard.dLength + iPart.Length + sawkerf, iBoard.dWidth);
+                    newBoards.InsertItemSortedbyAreaAsc(boardSection1);
+                }
+                BoardNode boardSection2 = null;
+                double w = iBoard.Width - iPart.Width - sawkerf;
+                if (w * iBoard.Length >= newParts.Head.Area)
+                {
+                    boardSection2 = new BoardNode(iBoard.ID, iBoard.Length, w, iBoard.dLength, iBoard.dWidth + iPart.Width + sawkerf);
+                    newBoards.InsertItemSortedbyAreaAsc(boardSection2);
+                    boardSection2.AssociatedBoard = boardSection1;
+                    if (boardSection1 != null) boardSection1.AssociatedBoard = boardSection2;
+                }
+                
 
-                    // pack the remaining parts on the remaining boards
-                    Pack_recursive(newParts, newBoards, packedParts, newPackedPartsArea);
+                // remove board sections smaller than the smallest part
+                //for (BoardNode i = boards.Head; i != null; i = i.Next) if (i.Area < parts.Head.Area) boards.Remove(i); else break;
 
-                    // remove all the boards we added...
-                    //if (boardSection1 != null) boards.Remove(boardSection1);
-                    //if (boardSection2 != null) boards.Remove(boardSection2);
 
-                    // place the board back
-                    //boards.InsertItemSortedbyAreaAsc(iBoard);
 
-                    // remove the current part from the list so we can try the next one
-                    packedParts.Remove(currentpart);
-                } 
+                // pack the remaining parts on the remaining boards
+                Pack_recursive(newParts, newBoards, packedParts, newPackedPartsArea);
+
+                // remove all the boards we added...
+                //if (boardSection1 != null) boards.Remove(boardSection1);
+                //if (boardSection2 != null) boards.Remove(boardSection2);
+
+                // place the board back
+                //boards.InsertItemSortedbyAreaAsc(iBoard);
+
+                // remove the current part from the list so we can try the next one
+                packedParts.Remove(PackedPart);
                 #endregion
             }
 
