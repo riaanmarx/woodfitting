@@ -235,18 +235,18 @@ namespace WoodFitting2.Packer_v1
                     if (l * iBoard.Width >= newParts.Head.Area)
                     {
                         boardSection1 = new BoardNode(iBoard.ID, l, iBoard.Width, iBoard.dLength + iPart.Length + sawkerf, iBoard.dWidth);
-                        boards.InsertItemSortedbyAreaAsc(boardSection1);
+                        newBoards.InsertItemSortedbyAreaAsc(boardSection1);
                     }
                     BoardNode boardSection2 = null;
                     double w = iBoard.Width - iPart.Width - sawkerf;
                     if (w * iBoard.Length >= newParts.Head.Area)
                     {
                         boardSection2 = new BoardNode(iBoard.ID, iBoard.Length, w, iBoard.dLength, iBoard.dWidth + iPart.Width + sawkerf);
-                        boards.InsertItemSortedbyAreaAsc(boardSection2);
+                        newBoards.InsertItemSortedbyAreaAsc(boardSection2);
                         boardSection2.AssociatedBoard = boardSection1;
                         if (boardSection1 != null) boardSection1.AssociatedBoard = boardSection2;
                     }
-                    boards.Remove(iBoard);
+                    newBoards.Remove(iBoard);
 
                     // remove board sections smaller than the smallest part
                     //for (BoardNode i = boards.Head; i != null; i = i.Next) if (i.Area < parts.Head.Area) boards.Remove(i); else break;
@@ -254,14 +254,14 @@ namespace WoodFitting2.Packer_v1
                     
 
                     // pack the remaining parts on the remaining boards
-                    Pack_recursive(newParts, boards, packedParts, newPackedPartsArea);
+                    Pack_recursive(newParts, newBoards, packedParts, newPackedPartsArea);
 
                     // remove all the boards we added...
-                    if (boardSection1 != null) boards.Remove(boardSection1);
-                    if (boardSection2 != null) boards.Remove(boardSection2);
+                    //if (boardSection1 != null) boards.Remove(boardSection1);
+                    //if (boardSection2 != null) boards.Remove(boardSection2);
 
                     // place the board back
-                    boards.InsertItemSortedbyAreaAsc(iBoard);
+                    //boards.InsertItemSortedbyAreaAsc(iBoard);
 
                     // remove the current part from the list so we can try the next one
                     packedParts.Remove(currentpart);
