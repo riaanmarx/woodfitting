@@ -227,8 +227,6 @@ namespace WoodFitting2.Packer_v1
                     }
                     newParts.Count--;
 
-                    BoardList newBoards = new BoardList(boards);
-
                     // divide the board into two overlapping remainder sections
                     BoardNode boardSection1 = null;
                     double l = iBoard.Length - iPart.Length - sawkerf;
