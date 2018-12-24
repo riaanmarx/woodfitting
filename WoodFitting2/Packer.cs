@@ -220,15 +220,16 @@ namespace WoodFitting2.Packer_v1
                 {
                     parts.Head = iPart.Next;
                     newParts = new PartList(parts);
+                    newParts.Count--;
                     parts.Head = iPart;
                 }
                 else
                 {
                     iPart.Prev.Next = iPart.Next;
                     newParts = new PartList(parts);
+                    newParts.Count--;
                     iPart.Prev.Next = iPart;
                 }
-                newParts.Count--;
                 #endregion
 
                 #region // replace the used board with 2 overlapping remainder pieces after subtracting the part ...
