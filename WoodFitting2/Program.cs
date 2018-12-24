@@ -157,10 +157,10 @@ namespace WoodFitting2
                 new PartNode("014", 310.0, 36.0),
                 new PartNode("015", 354.5, 36.0),
                 new PartNode("016", 354.5, 36.0),
-                //new PartNode("017", 299.0, 20.0),
-                new PartNode("018", 299.0, 20.0),
-                new PartNode("019", 299.0, 20.0),
-                new PartNode("020", 299.0, 20.0)//,
+                new PartNode("017", 299.0, 20.0),
+                new PartNode("018", 299.0, 20.0)
+                //new PartNode("019", 299.0, 20.0),
+                //new PartNode("020", 299.0, 20.0)//,
                 //new PartNode("021", 327.5, 20.0),
                 //new PartNode("022", 327.5, 20.0),
                 //new PartNode("023", 955.0, 80.0),
@@ -216,10 +216,10 @@ namespace WoodFitting2
             Trace.WriteLine($"  Saw blade kerf        : {SawKerf} mm");
             Trace.WriteLine($"  {boards.Count} Boards:");
             for (BoardNode iBoard = boards.Head; iBoard != null; iBoard = iBoard.Next)
-                Trace.WriteLine($"    {iBoard.ID} [{iBoard.Length,7:0.0} x {iBoard.Width,5:0.0}]");
+                Trace.WriteLine($"{iBoard.ID,6} [{iBoard.Length,7:0.0} x {iBoard.Width,5:0.0}]");
             Trace.WriteLine($"  {parts.Count} Parts:");
             for (PartNode iPart = parts.Head; iPart != null; iPart = iPart.Next)
-                Trace.WriteLine($"    {iPart.ID} [{iPart.Length,7:0.0} x {iPart.Width,5:0.0}]");
+                Trace.WriteLine($"{iPart.ID,6} [{iPart.Length,7:0.0} x {iPart.Width,5:0.0}]");
             #endregion
 
             #region // Find the solution ...
@@ -251,15 +251,13 @@ namespace WoodFitting2
             Trace.WriteLine("===========================================================");
             Trace.WriteLine("Solution summary");
             Trace.WriteLine("----------------");
-            Trace.WriteLine($"   Processing time: {sw.ElapsedMilliseconds,9:0} ms");
-            Trace.WriteLine($"   #Boards        : {boards.Count,9:0}");
-            Trace.WriteLine($"   #Parts         : {parts.Count,9:0}");
-            Trace.WriteLine($"   Total Stock    : {boards.TotalArea / 1000000,9:0.000} m\u00b2");
-            Trace.WriteLine($"   Used Stock     : {UsedStockArea / 1000000,9:0.000} m\u00b2");
-            Trace.WriteLine($"   Total Parts    : {parts.TotalArea / 1000000,9:0.000} m\u00b2");
-            Trace.WriteLine($"   Parts placed   : {solution.TotalArea / 1000000,9:0.000} m\u00b2");
-            Trace.WriteLine($"   Waste          : {(UsedStockArea - solution.TotalArea) / 1000000,9:0.000} m\u00b2 ({(UsedStockArea - solution.TotalArea) / UsedStockArea:0.0 %})");
-            Trace.WriteLine($"   Coverage       : {solution.TotalArea / UsedStockArea,11:0.0 %}");
+            Trace.WriteLine($"   Processing time: {sw.ElapsedMilliseconds,5:0} ms");
+            Trace.WriteLine($"   Boards         : {boards.Count,5:0}    ({boards.TotalArea / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Used boards    : {usedBoardIDs.Count,5:0}    ({UsedStockArea / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Parts          : {parts.Count,5:0}    ({parts.TotalArea / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Placed parts   : {solution.Count,5:0}    ({solution.TotalArea / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Waste          : {(UsedStockArea - solution.TotalArea) / UsedStockArea,7:0.0 %}  ({(UsedStockArea - solution.TotalArea) / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Coverage       : {solution.TotalArea / UsedStockArea,7:0.0 %}  ({(solution.TotalArea) / 1000000,6:0.000} m\u00b2)");
             #endregion
 
             #region // Draw solution to an image ...

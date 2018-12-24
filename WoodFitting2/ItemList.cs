@@ -510,7 +510,7 @@ namespace WoodFitting2
         {
             StringBuilder sb = new StringBuilder();
             for (PartNode iPart = Head; iPart != null; iPart = iPart.Next)
-                sb.Append($"{iPart.ID} [{iPart.Length,7:0.0} x {iPart.Width,5:0.0}] @ ({iPart.dLength,7:0.0} , {iPart.dWidth,5:0.0}) \r\n");
+                sb.Append($"{iPart.ID,6} [{iPart.Length,7:0.0} x {iPart.Width,5:0.0}] @ ({iPart.dLength,7:0.0} , {iPart.dWidth,5:0.0}) \r\n");
             return sb.ToString();
         }
 

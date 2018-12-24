@@ -77,6 +77,7 @@ namespace WoodFitting2.Packer_v1
                     threads.Add(
                         Task.Factory.StartNew((o) =>
                         {
+                            Thread.CurrentThread.Priority = ThreadPriority.Highest;
                             // for every board
                             BoardNode tiBoard = new BoardNode((BoardNode)o);
                             // subtract the margin from the board
@@ -131,15 +132,14 @@ namespace WoodFitting2.Packer_v1
             return completeSolution;
         }
 
-        private void Pack_recursive(PartList parts, BoardList boards, PartList packedParts, double packedPartsArea)
+        private void Pack_recursive(PartList parts, BoardList boards, PartList TemporarySolution, double tempSolutionArea)
         {
-
             // loop through remaining parts
             for (PartNode iPart = parts.Head; iPart != null; iPart = iPart.Next)
             {
                 #region // check if the part is a viable candidate ...
                 // if adding this part would increase the required volume past that of the board, stop...the rest of the parts are even bigger than this one
-                double newPackedPartsArea = packedPartsArea + iPart.Area;
+                double newPackedPartsArea = tempSolutionArea + iPart.Area;
                 if (newPackedPartsArea >= boardArea)
                     break;
 
@@ -169,7 +169,7 @@ namespace WoodFitting2.Packer_v1
                     dWidth = iBoard.dWidth,
                     dLength = iBoard.dLength
                 };
-                packedParts.Append(PackedPart);
+                TemporarySolution.Append(PackedPart);
                 #endregion
 
                 #region // store best solution ...
@@ -177,7 +177,7 @@ namespace WoodFitting2.Packer_v1
                 if (newPackedPartsArea > currentSolutionArea)
                 {
                     currentSolutionArea = newPackedPartsArea;
-                    currentSolution = new PartList(packedParts);
+                    currentSolution = new PartList(TemporarySolution);
                 }
                 #endregion
 
@@ -254,7 +254,7 @@ namespace WoodFitting2.Packer_v1
 
                 #region // pack the remaining parts on the remaining boards ...
                 // pack the remaining parts on the remaining boards
-                Pack_recursive(newParts, boards, packedParts, newPackedPartsArea);
+                Pack_recursive(newParts, boards, TemporarySolution, newPackedPartsArea);
                 #endregion
 
                 #region // undo the placement so we can iterate to the next part and test with it ...
@@ -266,7 +266,7 @@ namespace WoodFitting2.Packer_v1
                 boards.InsertItemSortedbyAreaAsc(iBoard);
 
                 // remove the current part from the list so we can try the next one
-                packedParts.Remove(PackedPart);
+                TemporarySolution.Remove(PackedPart);
                 #endregion
             }
 
