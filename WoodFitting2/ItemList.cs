@@ -150,16 +150,18 @@ namespace WoodFitting2
 
         public BoardList(params BoardNode[] boards)
         {
+            if (boards == null || boards.Length == 0 || boards[0] == null) return;
             Head = boards[0];
             Tail = Head;
-            Count = boards.Length;
-            for (int i = 1; i < Count; i++)
+            int i = 0;
+            Count = 1;
+            while (++i < boards.Length && boards[i] != null)
             {
                 boards[i].Prev = Tail;
                 Tail = Tail.Next = boards[i];
+                Count++;
             }
         }
-
         public void InsertItemSortedbyAreaAsc(BoardNode board)
         {
             if (Head == null)   // list is empty
@@ -317,15 +319,19 @@ namespace WoodFitting2
 
         public PartList(params PartNode[] parts)
         {
+            if (parts == null || parts.Length == 0 || parts[0] == null) return;
             Head = parts[0];
             Tail = Head;
-            Count = parts.Length;
-            for (int i = 1; i < Count; i++)
+            Count = 1;
+            int i = 0;
+            while (++i < parts.Length && parts[i] != null)
             {
                 parts[i].Prev = Tail;
                 Tail.Next = parts[i];
                 Tail = parts[i];
+                Count++;
             }
+
         }
 
         public PartList(PartList original)

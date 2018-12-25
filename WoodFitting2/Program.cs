@@ -137,7 +137,8 @@ namespace WoodFitting2
                 new BoardNode("E", 2100, 185),
                 new BoardNode("F", 2100, 210),
                 new BoardNode("G", 2100, 135),
-                new BoardNode("H", 2100, 225)
+                new BoardNode("H", 2100, 225),
+                null
             );
 
             PartList parts = new PartList(
@@ -158,11 +159,11 @@ namespace WoodFitting2
                 new PartNode("015", 354.5, 36.0),
                 new PartNode("016", 354.5, 36.0),
                 new PartNode("017", 299.0, 20.0),
-                new PartNode("018", 299.0, 20.0)
-                //new PartNode("019", 299.0, 20.0),
-                //new PartNode("020", 299.0, 20.0)//,
+                new PartNode("018", 299.0, 20.0),
+                new PartNode("019", 299.0, 20.0),
+                //new PartNode("020", 299.0, 20.0),
                 //new PartNode("021", 327.5, 20.0),
-                //new PartNode("022", 327.5, 20.0),
+                //new PartNode("022", 327.5, 20.0)
                 //new PartNode("023", 955.0, 80.0),
                 //new PartNode("024", 310.0, 100.0),
                 //new PartNode("025", 310.0, 100.0),
@@ -190,8 +191,9 @@ namespace WoodFitting2
                 //new PartNode("047", 310.0, 36.0),
                 //new PartNode("048", 354.5, 36.0),
                 //new PartNode("049", 354.5, 36.0),
-                //new PartNode("050", 299.0, 20.0)
-            );
+                //new PartNode("050", 299.0, 20.0),
+                null
+                );
             //#if !DEBUG
             //            if (args[0].StartsWith("-l:"))
             //            {

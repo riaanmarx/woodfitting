@@ -134,6 +134,8 @@ namespace WoodFitting2.Packer_v1
 
         private void Pack_recursive(PartList parts, BoardList boards, PartList TemporarySolution, double tempSolutionArea)
         {
+            PartNode LastPlacedPart = null;
+
             // loop through remaining parts
             for (PartNode iPart = parts.Head; iPart != null; iPart = iPart.Next)
             {
@@ -150,10 +152,10 @@ namespace WoodFitting2.Packer_v1
 
                 #region // Find first board that will fit the part ...
                 // find first board that will accomodate the part
-                BoardNode iBoard = boards.Head;
-                while (iBoard != null && iPart.Area > iBoard.Area) iBoard = iBoard.Next;
-                if (iBoard == null)
-                    break;
+                BoardNode iBoard = boards.Tail;
+
+                // if even the last (bigest) board had a smaller area than the part, non of the rest will fit
+                while (iBoard.Prev != null && iPart.Area < iBoard.Prev.Area) iBoard = iBoard.Prev;
 
                 while (iBoard != null && (iPart.Length > iBoard.Length || iPart.Width > iBoard.Width)) iBoard = iBoard.Next;
                 if (iBoard == null)
@@ -163,13 +165,13 @@ namespace WoodFitting2.Packer_v1
 
                 #region // place the part ...
                 //append the part to the list of packed parts
-                PartNode PackedPart = new PartNode(iPart)
+                LastPlacedPart = new PartNode(iPart)
                 {
                     Container = iBoard.ID,
                     dWidth = iBoard.dWidth,
                     dLength = iBoard.dLength
                 };
-                TemporarySolution.Append(PackedPart);
+                TemporarySolution.Append(LastPlacedPart);
                 #endregion
 
                 #region // store best solution ...
@@ -185,30 +187,35 @@ namespace WoodFitting2.Packer_v1
                 if (parts.Count == 1) break;
 
                 #region // Break association and adjust associate if a board is used that is associated with another to prevent overlapping placements ...
+                BoardNode iAssocBoard = iBoard.AssociatedBoard;
+                double oAssocLength=0, oAssocWidth=0;
                 // if the board section used has a buddy from a previous placement, adjust the buddy and break the association
-                if (iBoard.AssociatedBoard != null)
+                if (iAssocBoard != null)
                 {
+                    oAssocLength = iAssocBoard.Length;
+                    oAssocWidth = iAssocBoard.Width; ;
+
                     //we have to adjust the buddy, so as not to place another part on the overlapping area
-                    if (iBoard.dWidth < iBoard.AssociatedBoard.dWidth)
+                    if (iBoard.dWidth < iAssocBoard.dWidth)
                     {
                         //if this is Rem1
                         //if the part is wider than the left portion of Rem1
-                        if (iBoard.dWidth + iPart.Width + sawkerf > iBoard.AssociatedBoard.dWidth)
-                            iBoard.AssociatedBoard.Length -= (iBoard.Length + sawkerf);
+                        if (iBoard.dWidth + iPart.Width + sawkerf > iAssocBoard.dWidth)
+                            iAssocBoard.Length -= (iBoard.Length + sawkerf);
                         else
-                            iBoard.Width -= (iBoard.AssociatedBoard.Width + sawkerf);
+                            iBoard.Width -= (iAssocBoard.Width + sawkerf);
                     }
                     else
                     {
                         //if this is Rem2
-                        if (iBoard.dLength + iPart.Length + sawkerf > iBoard.AssociatedBoard.dLength)
-                            iBoard.AssociatedBoard.Width -= (iBoard.Width + sawkerf);
+                        if (iBoard.dLength + iPart.Length + sawkerf > iAssocBoard.dLength)
+                            iAssocBoard.Width -= (iBoard.Width + sawkerf);
                         else
-                            iBoard.Length -= (iBoard.AssociatedBoard.Length + sawkerf);
+                            iBoard.Length -= (iAssocBoard.Length + sawkerf);
                     }
 
                     //then break the pair
-                    iBoard.AssociatedBoard.AssociatedBoard = null;
+                    iAssocBoard.AssociatedBoard = null;
                     iBoard.AssociatedBoard = null;
                 }
                 #endregion
@@ -251,18 +258,29 @@ namespace WoodFitting2.Packer_v1
                     boardSection2.AssociatedBoard = boardSection1;
                     if (boardSection1 != null) boardSection1.AssociatedBoard = boardSection2;
                 }
-                
                 #endregion
 
-                #region // pack the remaining parts on the remaining boards ...
-                // pack the remaining parts on the remaining boards
-                Pack_recursive(newParts, boards, TemporarySolution, newPackedPartsArea);
-                #endregion
+                if (boards.Count > 0)
+                {
+                    #region // pack the remaining parts on the remaining boards ...
+                    // pack the remaining parts on the remaining boards
+                    Pack_recursive(newParts, boards, TemporarySolution, newPackedPartsArea);
+                    #endregion
+                }
 
                 #region // undo the placement so we can iterate to the next part and test with it ...
-                // remove all the boards we added...
+                // remove the remainder board sections we added...
                 if (boardSection1 != null) boards.Remove(boardSection1);
                 if (boardSection2 != null) boards.Remove(boardSection2);
+
+                // restore associations, and the original associated board's size
+                if (iAssocBoard != null)
+                {
+                    iBoard.AssociatedBoard = iAssocBoard;
+                    iAssocBoard.AssociatedBoard = iBoard;
+                    iAssocBoard.Length = oAssocLength;
+                    iAssocBoard.Width = oAssocWidth;
+                }
 
                 // place the board back
                 if (iBoard.Prev == null)
@@ -275,10 +293,18 @@ namespace WoodFitting2.Packer_v1
                     iBoard.Next.Prev = iBoard;
                 boards.Count++;
 
-                // remove the current part from the list so we can try the next one
-                TemporarySolution.Remove(PackedPart);
+                // remove the part from the temporary solution
+                TemporarySolution.Tail = TemporarySolution.Tail.Prev;
+                if (TemporarySolution.Tail != null)
+                    TemporarySolution.Tail.Next = null;
+                else
+                    TemporarySolution.Head = null;
+                TemporarySolution.Count--;
+
                 #endregion
             }
+
+
 
         }
 
