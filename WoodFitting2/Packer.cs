@@ -135,8 +135,6 @@ namespace WoodFitting2.Packer_v1
 
         private void Pack_recursive(PartList parts, BoardList boards, PartList TemporarySolution, double tempSolutionArea)
         {
-            PartNode LastPlacedPart = null;
-
             // loop through remaining parts
             for (PartNode iPart = parts.Head; iPart != null; iPart = iPart.Next)
             {
@@ -166,13 +164,12 @@ namespace WoodFitting2.Packer_v1
 
                 #region // place the part ...
                 //append the part to the list of packed parts
-                LastPlacedPart = new PartNode(iPart)
+                TemporarySolution.Append(new PartNode(iPart)
                 {
                     Container = iBoard.ID,
                     dWidth = iBoard.dWidth,
                     dLength = iBoard.dLength
-                };
-                TemporarySolution.Append(LastPlacedPart);
+                });
                 #endregion
 
                 #region // store best solution ...
