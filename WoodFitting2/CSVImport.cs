@@ -8,7 +8,6 @@ using WoodFitting2.Packer_v1;
 
 namespace WoodFitting2
 {
-#if oldversion
     class Import
     {
 
@@ -46,8 +45,22 @@ namespace WoodFitting2
             [CsvColumn(Name = "nothing", FieldIndex = 11)]
             public string nothing { get; set; }
         }
-        
-        public static void FromCutlistPlusCSV(string filePath, out List<Item> parts, out List<Item> boards)
+        class CSVRecord
+        {
+            [CsvColumn(Name = "Type", FieldIndex = 1, CanBeNull = false)]
+            public string ItemType { get; set; }
+
+            [CsvColumn(Name = "ID", FieldIndex = 2)]
+            public string PartID { get; set; }
+
+            [CsvColumn(Name = "Length", FieldIndex = 3)]
+            public string Length { get; set; }
+
+            [CsvColumn(Name = "Width", FieldIndex = 4)]
+            public string Width { get; set; }
+        }
+
+        public static void FromCutlistPlusCSV(string filePath, out PartList parts, out BoardList boards)
         {
             CsvFileDescription inputFileDescription = new CsvFileDescription
             {
@@ -61,15 +74,37 @@ namespace WoodFitting2
             IEnumerable<CutListPlusCSVRecord> records = new List<CutListPlusCSVRecord>( 
                 cc.Read<CutListPlusCSVRecord>(filePath, inputFileDescription));
 
-            parts = new List<Item>();
-            boards = new List<Item>();
+            parts = new PartList();
+            boards = new BoardList();
             foreach (var iline in records.Where(t=>t.PartNumber!="Part #"))
                 if(iline.MaterialName == "Stock")
-                    boards.Add(new Item(iline.PartName, double.Parse(iline.Length.Replace("mm", "")), double.Parse(iline.Width.Replace("mm", ""))));
+                    boards.Append(new BoardNode(iline.PartName, double.Parse(iline.Length.Replace("mm", "")), double.Parse(iline.Width.Replace("mm", ""))));
                 else
-                    parts.Add(new Item(iline.PartName, double.Parse(iline.Length.Replace("mm", "")), double.Parse(iline.Width.Replace("mm", ""))));
+                    parts.Append(new PartNode(iline.PartName, double.Parse(iline.Length.Replace("mm", "")), double.Parse(iline.Width.Replace("mm", ""))));
             
         }
+
+        internal static void FromCSV(string path, out PartList parts, out BoardList boards)
+        {
+            CsvFileDescription inputFileDescription = new CsvFileDescription
+            {
+                SeparatorChar = ',',
+                FirstLineHasColumnNames = false,
+                EnforceCsvColumnAttribute = true,
+                UseFieldIndexForReadingData = true
+            };
+            CsvContext cc = new CsvContext();
+
+            IEnumerable<CSVRecord> records = new List<CSVRecord>(
+                cc.Read<CSVRecord>(path, inputFileDescription));
+
+            parts = new PartList();
+            boards = new BoardList();
+            foreach (var iline in records.Where(t => !t.ItemType.StartsWith("#")))
+                if (iline.ItemType.ToLower() == "board")
+                    boards.Append(new BoardNode(iline.PartID, double.Parse(iline.Length), double.Parse(iline.Width)));
+                else
+                    parts.Append(new PartNode(iline.PartID, double.Parse(iline.Length), double.Parse(iline.Width)));
+        }
     }
-#endif
 }

@@ -60,6 +60,9 @@
     <None Include="App.config" />
     <Compile Include="CSVImport.cs" />
     <None Include="packages.config" />
+    <None Include="sample.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

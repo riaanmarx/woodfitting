@@ -147,7 +147,7 @@ namespace WoodFitting2
                 new PartNode("003", 1721.7, 100.0),
                 new PartNode("004", 284.5, 100.0),
                 new PartNode("005", 955.0, 69.3),
-                new PartNode("006", 955.0, 60.0),
+                //new PartNode("006", 955.0, 60.0),
                 new PartNode("007", 955.0, 69.6),
                 new PartNode("008", 955.0, 80.0),
                 new PartNode("009", 955.0, 60.0),
@@ -156,7 +156,7 @@ namespace WoodFitting2
                 new PartNode("012", 310.0, 100.0),
                 new PartNode("013", 310.0, 36.0),
                 new PartNode("014", 310.0, 36.0),
-                new PartNode("015", 354.5, 36.0),
+                //new PartNode("015", 354.5, 36.0),
                 new PartNode("016", 354.5, 36.0),
                 new PartNode("017", 299.0, 20.0),
                 new PartNode("018", 299.0, 20.0),
@@ -194,20 +194,18 @@ namespace WoodFitting2
                 //new PartNode("050", 299.0, 20.0),
                 null
                 );
-            //#if !DEBUG
-            //            if (args[0].StartsWith("-l:"))
-            //            {
-            //                string path = args[0].Replace("-l:", "");
-            //                if (System.IO.File.Exists(path))
-            //                {
-            //                    Import.FromCutlistPlusCSV(path, out List<Item> lstParts, out List<Item> lstBoards);
-            //                    parts = lstParts.Where(t => "009,007,019,022".Split(',').Contains(t.Name)).ToArray();
-            //                    //parts = lstParts.ToArray();
-            //                    boards = lstBoards.Where(t => new string[] { "E" }.Contains(t.Name)).ToArray();
-            //                    //boards = lstBoards.ToArray();
-            //                }
-            //            }
-            //#endif 
+            if (args[0].StartsWith("-clp:"))
+            {
+                string path = args[0].Replace("-clp:", "");
+                if (System.IO.File.Exists(path))
+                    Import.FromCutlistPlusCSV(path, out parts, out boards);
+            }
+            if (args[0].StartsWith("-csv:"))
+            {
+                string path = args[0].Replace("-csv:", "");
+                if (System.IO.File.Exists(path))
+                    Import.FromCSV(path, out parts, out boards);
+            }
             #endregion
 
             #region // Print starting parameters ...

@@ -296,6 +296,25 @@ namespace WoodFitting2
                 sb.Append($"{iBoard.ID} [{iBoard.Length,7:0.0} x {iBoard.Width,5:0.0}] @ ({iBoard.dLength,7:0.0} , {iBoard.dWidth,5:0.0}) \r\n");
             return sb.ToString();
         }
+        public void Append(BoardNode board)
+        {
+            if (Head == null)
+            {
+                board.Next = null;
+                board.Prev = null;
+                Head = board;
+                Tail = board;
+                Count = 1;
+            }
+            else
+            {
+                board.Next = null;
+                board.Prev = Tail;
+                Tail.Next = board;
+                Tail = board;
+                Count++;
+            }
+        }
 
         public BoardList OrderredByArea()
         {

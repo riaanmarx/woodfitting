@@ -95,7 +95,6 @@ namespace WoodFitting2.Packer_v1
 
                             Trace.WriteLine($"......in iteration {iteration+1}: Board {iPacker.currentSolution.Head.Container} packed to {iPacker.currentSolutionArea/iPacker.boardArea:0 %} :\r\n{iPacker.currentSolution.ToString()}");
 
-
                             // replace the best solution if this one is better
                             lock (lck)
                                 if (iPacker.currentSolutionArea / iPacker.boardArea > bestsolutioncoverage)
