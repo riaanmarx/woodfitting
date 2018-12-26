@@ -120,6 +120,7 @@ namespace WoodFitting2.Packer_v1
                 for (PartNode iPart = bestsolution.Head; iPart != null; iPart = iPart.Next)
                     orderredParts.Remove(iPart.ID);
 
+
                 // add this partial solution to the complete solution...
                 completeSolution.Append(bestsolution);
             }
@@ -188,7 +189,7 @@ namespace WoodFitting2.Packer_v1
 
                 #region // Break association and adjust associate if a board is used that is associated with another to prevent overlapping placements ...
                 BoardNode iAssocBoard = iBoard.AssociatedBoard;
-                double oAssocLength=0, oAssocWidth=0;
+                double oAssocLength = 0, oAssocWidth = 0;
                 // if the board section used has a buddy from a previous placement, adjust the buddy and break the association
                 if (iAssocBoard != null)
                 {
