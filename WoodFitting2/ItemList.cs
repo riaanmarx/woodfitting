@@ -411,6 +411,21 @@ namespace WoodFitting2
             Count++;
         }
 
+        public void Return(PartNode part)
+        {
+            if (part.Next == null)
+                Tail = part;
+            else
+                part.Next.Prev = part;
+
+            if (part.Prev == null)
+                Head = part;
+            else
+                part.Prev.Next = part;
+
+            Count++;
+        }
+
         public void Append(PartList list)
         {
             if (Head == null)

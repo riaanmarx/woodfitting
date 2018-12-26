@@ -124,7 +124,7 @@ namespace WoodFitting2
             #region // Gather the inputs to the solution ...
             double boardMargins_length = 25;
             double boardMargins_Width = 5;
-            double PartPadding_Length = 0;
+            double PartPadding_Length = 1;
             double PartPadding_Width = 1;
             double SawKerf = 3.2;
 
@@ -161,12 +161,12 @@ namespace WoodFitting2
                 new PartNode("017", 299.0, 20.0),
                 new PartNode("018", 299.0, 20.0),
                 new PartNode("019", 299.0, 20.0),
-                //new PartNode("020", 299.0, 20.0),
-                //new PartNode("021", 327.5, 20.0),
-                //new PartNode("022", 327.5, 20.0)
-                //new PartNode("023", 955.0, 80.0),
-                //new PartNode("024", 310.0, 100.0),
-                //new PartNode("025", 310.0, 100.0),
+                new PartNode("020", 299.0, 20.0),
+                new PartNode("021", 327.5, 20.0),
+                new PartNode("022", 327.5, 20.0),
+                new PartNode("023", 955.0, 80.0),
+                new PartNode("024", 310.0, 100.0),
+                new PartNode("025", 310.0, 100.0),
                 //new PartNode("026", 310.0, 36.0),
                 //new PartNode("027", 310.0, 36.0),
                 //new PartNode("028", 354.5, 36.0),

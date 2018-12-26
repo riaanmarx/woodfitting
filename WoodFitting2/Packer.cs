@@ -91,7 +91,10 @@ namespace WoodFitting2.Packer_v1
                             };
 
                             // pack the board recursively, starting at the first part and an empty solution
-                            iPacker.Pack_recursive(orderredParts, new BoardList(tiBoard), new PartList(), 0);
+                            iPacker.Pack_recursive(new PartList(orderredParts), new BoardList(tiBoard), new PartList(), 0);
+
+                            Trace.WriteLine($"......in iteration {iteration+1}: Board {iPacker.currentSolution.Head.Container} packed to {iPacker.currentSolutionArea/iPacker.boardArea:0 %} :\r\n{iPacker.currentSolution.ToString()}");
+
 
                             // replace the best solution if this one is better
                             lock (lck)
@@ -145,7 +148,7 @@ namespace WoodFitting2.Packer_v1
                     break;
 
                 // if the previous part was the same size, pass this one - we already completed this iteration
-                if (iPart != parts.Head && iPart.Length == iPart.Prev.Length && iPart.Width == iPart.Prev.Width)
+                if (iPart.Prev != null && iPart.Length == iPart.Prev.Length && iPart.Width == iPart.Prev.Width)
                     continue;
                 #endregion
 
@@ -218,23 +221,8 @@ namespace WoodFitting2.Packer_v1
                 }
                 #endregion
 
-                #region // copy parts list for the next recursion ...
-                // make my own copy of the list, minus the current part
-                PartList newParts;
-                if (iPart.Prev == null)
-                {
-                    parts.Head = iPart.Next;
-                    newParts = new PartList(parts);
-                    newParts.Count--;
-                    parts.Head = iPart;
-                }
-                else
-                {
-                    iPart.Prev.Next = iPart.Next;
-                    newParts = new PartList(parts);
-                    newParts.Count--;
-                    iPart.Prev.Next = iPart;
-                }
+                #region // remove the current part from the parts list ...
+                parts.Remove(iPart);
                 #endregion
 
                 #region // replace the used board with 2 overlapping remainder pieces after subtracting the part ...
@@ -242,14 +230,14 @@ namespace WoodFitting2.Packer_v1
                 boards.Remove(iBoard);
                 BoardNode boardSection1 = null;
                 double l = iBoard.Length - iPart.Length - sawkerf;
-                if (l * iBoard.Width >= newParts.Head.Area)
+                if (l * iBoard.Width >= parts.Head.Area)
                 {
                     boardSection1 = new BoardNode(iBoard.ID, l, iBoard.Width, iBoard.dLength + iPart.Length + sawkerf, iBoard.dWidth);
                     boards.InsertItemSortedbyAreaAsc(boardSection1);
                 }
                 BoardNode boardSection2 = null;
                 double w = iBoard.Width - iPart.Width - sawkerf;
-                if (w * iBoard.Length >= newParts.Head.Area)
+                if (w * iBoard.Length >= parts.Head.Area)
                 {
                     boardSection2 = new BoardNode(iBoard.ID, iBoard.Length, w, iBoard.dLength, iBoard.dWidth + iPart.Width + sawkerf);
                     boards.InsertItemSortedbyAreaAsc(boardSection2);
@@ -262,11 +250,14 @@ namespace WoodFitting2.Packer_v1
                 {
                     #region // pack the remaining parts on the remaining boards ...
                     // pack the remaining parts on the remaining boards
-                    Pack_recursive(newParts, boards, TemporarySolution, newPackedPartsArea);
+                    Pack_recursive(parts, boards, TemporarySolution, newPackedPartsArea);
                     #endregion
                 }
 
                 #region // undo the placement so we can iterate to the next part and test with it ...
+                // place the current part back in its exact place ...
+                parts.Return(iPart);
+
                 // remove the remainder board sections we added...
                 if (boardSection1 != null) boards.Remove(boardSection1);
                 if (boardSection2 != null) boards.Remove(boardSection2);
