@@ -1,0 +1,4 @@
+﻿#Type,ID,Length,Width
+Board,A,800,200
+#Board,A 2,200,200
+Part,linker poot,700,100
