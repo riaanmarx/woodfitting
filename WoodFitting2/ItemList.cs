@@ -68,6 +68,7 @@ namespace WoodFitting2
         public double dWidth;
         public double dLength;
         public BoardNode AssociatedBoard;
+        public PartList Solution;
 
         public BoardNode Next;   // the next node in the list
         public BoardNode Prev;   // the previous node in the list
@@ -324,6 +325,16 @@ namespace WoodFitting2
 
             return orderredList;
         }
+
+        public BoardNode this[string id]
+        {
+            get
+            {
+                BoardNode i = Head;
+                while (i != null && i.ID != id) i = i.Next;
+                return i;
+            }
+        }
     }
 
     public class PartList
@@ -549,9 +560,19 @@ namespace WoodFitting2
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            for (PartNode iPart = Head; iPart != null; iPart = iPart.Next)
-                sb.Append($"{iPart.ID,6} [{iPart.Length,7:0.0} x {iPart.Width,5:0.0}] @ ({iPart.dLength,7:0.0} , {iPart.dWidth,5:0.0}) \r\n");
+            PartNode[] list = ToArray.OrderBy(t => t.ID).ToArray();
+            foreach (var iPart in list)
+            //for (PartNode iPart = Head; iPart != null; iPart = iPart.Next)
+                sb.Append($"{iPart.ID,8} [{iPart.Length,7:0.0} x {iPart.Width,5:0.0}] @ ({iPart.dLength,7:0.0} , {iPart.dWidth,5:0.0}) \r\n");
             return sb.ToString();
+        }
+
+        public string IDList
+        {
+            get
+            {
+                return string.Join(",", ToArray.OrderBy(q=>q.ID).Select(t => t.ID));
+            }
         }
 
         public void InflateAll(double deltaWidth, double deltaHeight)

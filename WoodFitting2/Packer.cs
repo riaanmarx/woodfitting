@@ -43,11 +43,10 @@ namespace WoodFitting2.Packer_v1
     /// </summary>
     public class Packer
     {
-        public double currentSolutionShortcutRatio = 0.85;
         public double currentSolutionArea = 0;
         public PartList currentSolution = null;
         public double boardArea = 0;
-        public double sawkerf = 4;
+        public double sawkerf = 3.2;
         static readonly object lck = new object();
         static public PartList Pack(PartList parts, BoardList boards, double sawkerf = 4, double boardMarginLength = 0, double boardMarginWidth = 0, double partPaddingLength = 0, double partPaddingWidth = 0)
         {
@@ -93,7 +92,7 @@ namespace WoodFitting2.Packer_v1
                             // pack the board recursively, starting at the first part and an empty solution
                             iPacker.Pack_recursive(new PartList(orderredParts), new BoardList(tiBoard), new PartList(), 0);
 
-                            Trace.WriteLine($"......in iteration {iteration+1}: Board {iPacker.currentSolution.Head.Container} packed to {iPacker.currentSolutionArea/iPacker.boardArea:0 %} :\r\n{iPacker.currentSolution.ToString()}");
+                            //Trace.WriteLine($"......in iteration {iteration+1}: Board {iPacker.currentSolution.Head.Container} packed to {iPacker.currentSolutionArea/iPacker.boardArea:0 %} :\r\n{iPacker.currentSolution.ToString()}");
 
                             // replace the best solution if this one is better
                             lock (lck)
@@ -104,7 +103,7 @@ namespace WoodFitting2.Packer_v1
                                 }
                         }, iBoard));
                 Task.WaitAll(threads.ToArray());
-
+                
                 // if no board could be packed, stop
                 if (bestsolutioncoverage == 0)
                 {
@@ -112,6 +111,7 @@ namespace WoodFitting2.Packer_v1
                     break;
                 }
 
+                boards[bestsolution.Head.Container].Solution = new PartList(bestsolution);
                 // report the best packking for this iteration
                 Trace.WriteLine($"Best solution for iteration {++iteration}: Board {bestsolution.Head.Container} packed to {bestsolutioncoverage:0 %} :\r\n{bestsolution.ToString()}");
 
@@ -128,8 +128,8 @@ namespace WoodFitting2.Packer_v1
             }
 
             // report if not enough boards
-            if (orderredParts.Count > 0)
-                Trace.WriteLine("STOPPING: Boards are used up, and we have parts left...");
+            //if (orderredParts.Count > 0)
+            //    Trace.WriteLine("STOPPING: Boards are used up, and we have parts left...");
 
             // return the solution
             return completeSolution;

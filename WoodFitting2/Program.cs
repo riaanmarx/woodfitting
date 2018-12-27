@@ -122,51 +122,51 @@ namespace WoodFitting2
         static void Main(string[] args)
         {
             #region // Gather the inputs to the solution ...
-            double boardMargins_length = 25;
-            double boardMargins_Width = 5;
-            double PartPadding_Length = 1;
-            double PartPadding_Width = 1;
+            double boardMargins_length = 0;
+            double boardMargins_Width = 0;
+            double PartPadding_Length = 0;
+            double PartPadding_Width = 0;
             double SawKerf = 3.2;
 
 
             BoardList boards = new BoardList(
-                new BoardNode("A", 2100, 193),
-                new BoardNode("B", 2100, 150),
-                new BoardNode("C", 2100, 143),
-                new BoardNode("D", 2100, 170),
-                new BoardNode("E", 2100, 185),
+                //new BoardNode("A", 2100, 193),
+                //new BoardNode("B", 2100, 150),
+                //new BoardNode("C", 2100, 143),
+                //new BoardNode("D", 2100, 170),
+                //new BoardNode("E", 2100, 185),
                 new BoardNode("F", 2100, 210),
-                new BoardNode("G", 2100, 135),
-                new BoardNode("H", 2100, 225),
+                //new BoardNode("G", 2100, 135),
+                //new BoardNode("H", 2100, 225),
                 null
             );
 
             PartList parts = new PartList(
                 new PartNode("001", 1721.7, 100.0),
-                new PartNode("002", 284.5, 100.0),
+                //new PartNode("002", 284.5, 100.0),
                 new PartNode("003", 1721.7, 100.0),
-                new PartNode("004", 284.5, 100.0),
-                new PartNode("005", 955.0, 69.3),
+                //new PartNode("004", 284.5, 100.0),
+                //new PartNode("005", 955.0, 69.3),
                 //new PartNode("006", 955.0, 60.0),
-                new PartNode("007", 955.0, 69.6),
-                new PartNode("008", 955.0, 80.0),
-                new PartNode("009", 955.0, 60.0),
-                new PartNode("010", 955.0, 60.0),
-                new PartNode("011", 310.0, 100.0),
-                new PartNode("012", 310.0, 100.0),
+                //new PartNode("007", 955.0, 69.6),
+                //new PartNode("008", 955.0, 80.0),
+                //new PartNode("009", 955.0, 60.0),
+                //new PartNode("010", 955.0, 60.0),
+                //new PartNode("011", 310.0, 100.0),
+                //new PartNode("012", 310.0, 100.0),
                 new PartNode("013", 310.0, 36.0),
                 new PartNode("014", 310.0, 36.0),
-                //new PartNode("015", 354.5, 36.0),
+                new PartNode("015", 354.5, 36.0),
                 new PartNode("016", 354.5, 36.0),
-                new PartNode("017", 299.0, 20.0),
-                new PartNode("018", 299.0, 20.0),
-                new PartNode("019", 299.0, 20.0),
-                new PartNode("020", 299.0, 20.0),
+                //new PartNode("017", 299.0, 20.0),
+                //new PartNode("018", 299.0, 20.0),
+                //new PartNode("019", 299.0, 20.0),
+                //new PartNode("020", 299.0, 20.0),
                 new PartNode("021", 327.5, 20.0),
                 new PartNode("022", 327.5, 20.0),
-                new PartNode("023", 955.0, 80.0),
-                new PartNode("024", 310.0, 100.0),
-                new PartNode("025", 310.0, 100.0),
+                //new PartNode("023", 955.0, 80.0),
+                //new PartNode("024", 310.0, 100.0),
+                //new PartNode("025", 310.0, 100.0),
                 //new PartNode("026", 310.0, 36.0),
                 //new PartNode("027", 310.0, 36.0),
                 //new PartNode("028", 354.5, 36.0),
@@ -241,12 +241,15 @@ namespace WoodFitting2
 
             Trace.WriteLine("Solution:");
             Trace.WriteLine("----------------");
+            if (solution.Count < parts.Count)
+                Trace.WriteLine("WARNING: All parts could not be placed!\r\n");
+
             for (var iBoard = boards.Head; iBoard != null; iBoard = iBoard.Next)
             {
-                Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] :");
-                for (PartNode iPlacement = solution.Head; iPlacement != null; iPlacement = iPlacement.Next)
-                    if (iPlacement.Container == iBoard.ID)
-                        Trace.WriteLine($"     {iPlacement.ID} [{iPlacement.Length,6:0.0} x {iPlacement.Width,5:0.0}] @ ({iPlacement.dLength,6:0.0}, {iPlacement.dWidth,5:0.0})");
+                if (iBoard.Solution == null)
+                    Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] : not used.");
+                else
+                    Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] ({(iBoard.Solution==null ? 0 :iBoard.Solution.TotalArea/iBoard.Area):00.0 %}) :\r\n{iBoard.Solution?.ToString()}");
             }
             Trace.WriteLine("===========================================================");
             Trace.WriteLine("Solution summary");
