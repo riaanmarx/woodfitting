@@ -122,14 +122,9 @@ namespace WoodFitting2.Packer_v1
                 for (PartNode iPart = bestsolution.Head; iPart != null; iPart = iPart.Next)
                     orderredParts.Remove(iPart.ID);
 
-
                 // add this partial solution to the complete solution...
                 completeSolution.Append(bestsolution);
             }
-
-            // report if not enough boards
-            //if (orderredParts.Count > 0)
-            //    Trace.WriteLine("STOPPING: Boards are used up, and we have parts left...");
 
             // return the solution
             return completeSolution;
@@ -138,26 +133,24 @@ namespace WoodFitting2.Packer_v1
         private void Pack_recursive(PartList parts, BoardList boards, PartList TemporarySolution, double tempSolutionArea)
         {
             // loop through remaining parts
-            for (PartNode iPart = parts.Head; iPart != null; iPart = iPart.Next)
+            for (PartNode iPart = parts.Tail; iPart != null; iPart = iPart.Prev)
             {
-                #region // check if the part is a viable candidate ...
-                // if adding this part would increase the required volume past that of the board, stop...the rest of the parts are even bigger than this one
-                double newPackedPartsArea = tempSolutionArea + iPart.Area;
-                if (newPackedPartsArea >= boardArea)
-                    break;
 
+                #region // check if the part is a viable candidate ...
+                // if this part has bigger area than the largest board segment available, go to next part
+                if (iPart.Area > boards.Tail.Area)
+                    continue;
                 // if the previous part was the same size, pass this one - we already completed this iteration
-                if (iPart.Prev != null && iPart.Length == iPart.Prev.Length && iPart.Width == iPart.Prev.Width)
+                if (iPart != parts.Tail && iPart.Length == iPart.Next.Length && iPart.Width == iPart.Next.Width)
                     continue;
                 #endregion
 
                 #region // Find first board that will fit the part ...
                 // find first board that will accomodate the part
-                BoardNode iBoard = boards.Tail;
+                BoardNode iBoard = boards.Head;
 
                 // if even the last (bigest) board had a smaller area than the part, non of the rest will fit
-                while (iBoard.Prev != null && iPart.Area < iBoard.Prev.Area) iBoard = iBoard.Prev;
-
+                while (iPart.Area > iBoard.Area) iBoard = iBoard.Next;
                 while (iBoard != null && (iPart.Length > iBoard.Length || iPart.Width > iBoard.Width)) iBoard = iBoard.Next;
                 if (iBoard == null)
                     continue; // if this part cannot fit any board, continue to next part
@@ -165,6 +158,7 @@ namespace WoodFitting2.Packer_v1
                 #endregion
 
                 #region // place the part ...
+                double newPackedPartsArea = tempSolutionArea + iPart.Area;
                 //append the part to the list of packed parts
                 TemporarySolution.Append(new PartNode(iPart)
                 {
@@ -291,9 +285,6 @@ namespace WoodFitting2.Packer_v1
 
                 #endregion
             }
-
-
-
         }
 
 

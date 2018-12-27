@@ -143,25 +143,25 @@ namespace WoodFitting2
 
             PartList parts = new PartList(
                 new PartNode("001", 1721.7, 100.0),
-                //new PartNode("002", 284.5, 100.0),
+                new PartNode("002", 284.5, 100.0),
                 new PartNode("003", 1721.7, 100.0),
-                //new PartNode("004", 284.5, 100.0),
-                //new PartNode("005", 955.0, 69.3),
-                //new PartNode("006", 955.0, 60.0),
-                //new PartNode("007", 955.0, 69.6),
-                //new PartNode("008", 955.0, 80.0),
-                //new PartNode("009", 955.0, 60.0),
-                //new PartNode("010", 955.0, 60.0),
-                //new PartNode("011", 310.0, 100.0),
-                //new PartNode("012", 310.0, 100.0),
+                new PartNode("004", 284.5, 100.0),
+                new PartNode("005", 955.0, 69.3),
+                new PartNode("006", 955.0, 60.0),
+                new PartNode("007", 955.0, 69.6),
+                new PartNode("008", 955.0, 80.0),
+                new PartNode("009", 955.0, 60.0),
+                new PartNode("010", 955.0, 60.0),
+                new PartNode("011", 310.0, 100.0),
+                new PartNode("012", 310.0, 100.0),
                 new PartNode("013", 310.0, 36.0),
                 new PartNode("014", 310.0, 36.0),
                 new PartNode("015", 354.5, 36.0),
                 new PartNode("016", 354.5, 36.0),
-                //new PartNode("017", 299.0, 20.0),
-                //new PartNode("018", 299.0, 20.0),
-                //new PartNode("019", 299.0, 20.0),
-                //new PartNode("020", 299.0, 20.0),
+                new PartNode("017", 299.0, 20.0),
+                new PartNode("018", 299.0, 20.0),
+                new PartNode("019", 299.0, 20.0),
+                new PartNode("020", 299.0, 20.0),
                 new PartNode("021", 327.5, 20.0),
                 new PartNode("022", 327.5, 20.0),
                 //new PartNode("023", 955.0, 80.0),
@@ -208,6 +208,28 @@ namespace WoodFitting2
             }
             #endregion
 
+            //PartNode[] partsarray = parts.ToArray;
+            //List<PartNode> partsList = new List<PartNode>(partsarray);
+            //Stopwatch swt = new Stopwatch();
+            //swt.Start();
+            //for (int i = 0; i < 120000000; i++)
+            //{
+            //    //Array
+            //    PartNode iPart;
+            //    for (int j = 0; j < partsarray.Length; j++) { iPart = partsarray[j]; }
+
+            //    //linked list
+            //    //for (var iPart = parts.Head; iPart != null; iPart = iPart.Next) ;
+
+            //    //List
+            //    //foreach (var iPart in partsList) ;
+            //    //PartNode iPart;
+            //    //for (int j = 0; j < partsList.Count; j++) iPart = partsList[j];
+            //}
+            //swt.Stop();
+            //Trace.WriteLine(swt.ElapsedMilliseconds);
+
+
             #region // Print starting parameters ...
             Trace.WriteLine($"Packing started @ {DateTime.Now} with the following:");
             Trace.WriteLine($"------------------------------------------------");
@@ -249,7 +271,7 @@ namespace WoodFitting2
                 if (iBoard.Solution == null)
                     Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] : not used.");
                 else
-                    Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] ({(iBoard.Solution==null ? 0 :iBoard.Solution.TotalArea/iBoard.Area):00.0 %}) :\r\n{iBoard.Solution?.ToString()}");
+                    Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] ({(iBoard.Solution == null ? 0 : iBoard.Solution.TotalArea / iBoard.Area):00.0 %}) :\r\n{iBoard.Solution?.ToString()}");
             }
             Trace.WriteLine("===========================================================");
             Trace.WriteLine("Solution summary");
