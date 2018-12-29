@@ -14,7 +14,7 @@ namespace WoodFitting2
     class program
     {
 
-        public static Bitmap Draw(BoardList boards, PartList parts, bool usedstockonly = true)
+        public static Bitmap Draw(Board[] boards, bool usedstockonly = true)
         {
             double xOffset = 0;
             double imageHeight = 0;
@@ -25,12 +25,9 @@ namespace WoodFitting2
             Font boardFont = new Font(new FontFamily("Consolas"), 15.0f);
 
             // create list of boards to draw
-            List<BoardNode> boardsToDraw = new List<BoardNode>(boards.ToArray);
+            List<Board> boardsToDraw = new List<Board>(boards);
             if (usedstockonly)
-            {
-                List<string> usedboardnames = parts.ToArray.Select(t => t.Container).Distinct().ToList();
-                boardsToDraw.RemoveAll(t => !usedboardnames.Contains(t.ID));
-            }
+                boardsToDraw = boards.Where(t => t.PackedParts != null).ToList();
 
             // calculate width & height required for the bitmap
             foreach (var iBoard in boardsToDraw)
@@ -59,19 +56,21 @@ namespace WoodFitting2
 
                 // loop through all the parts and draw the ones on the current board
                 string overflowtext = "";
-                for (PartNode iPlacement = parts.Head; iPlacement != null; iPlacement = iPlacement.Next)
+                //for (Part iPlacement = parts.Head; iPlacement != null; iPlacement = iPlacement.Next)
+                for (int i = 0; i < iBoard.PartsCount; i++)
                 {
-                    // continue with next part if this part was placed on another board
-                    if (iPlacement.Container != iBoard.ID) continue;
+                    Part iPlacement = iBoard.PackedParts[i];
+                    double dLength = iBoard.PartdLengths[i];
+                    double dWidth = iBoard.PartdWidths[i];
 
                     // draw the part
-                    g.FillRectangle(Brushes.Green, (float)(xOffset + iPlacement.dWidth), (float)(iPlacement.dLength + yMargin), (float)iPlacement.Width, (float)iPlacement.Length);
+                    g.FillRectangle(Brushes.Green, (float)(xOffset + dWidth), (float)(dLength + yMargin), (float)iPlacement.Width, (float)iPlacement.Length);
 
                     // print the part text
                     string text1 = $"{iPlacement.ID} [{iPlacement.Length} x {iPlacement.Width}]";
                     string text2a = $"{iPlacement.ID}";
                     string text2b = $"[{iPlacement.Length} x {iPlacement.Width}]";
-                    g.TranslateTransform((float)(xOffset + iPlacement.dWidth + iPlacement.Width / 2), (float)(iPlacement.dLength + iPlacement.Length / 2 + yMargin));
+                    g.TranslateTransform((float)(xOffset + dWidth + iPlacement.Width / 2), (float)(dLength + iPlacement.Length / 2 + yMargin));
                     g.RotateTransform(-90);
 
                     int sz = 16;
@@ -102,7 +101,7 @@ namespace WoodFitting2
 
 
                     g.RotateTransform(90);
-                    g.TranslateTransform(-((float)xOffset + (float)(iPlacement.dWidth + iPlacement.Width / 2)), -((float)(iPlacement.dLength + iPlacement.Length / 2 + yMargin)));
+                    g.TranslateTransform(-((float)xOffset + (float)(dWidth + iPlacement.Width / 2)), -((float)(dLength + iPlacement.Length / 2 + yMargin)));
                 }
 
                 g.TranslateTransform((float)(xOffset + iBoard.Width), (float)(iBoard.Length + yMargin));
@@ -122,78 +121,72 @@ namespace WoodFitting2
         static void Main(string[] args)
         {
             #region // Gather the inputs to the solution ...
-            double boardMargins_length = 0;
-            double boardMargins_Width = 0;
             double PartPadding_Length = 0;
             double PartPadding_Width = 0;
             double SawKerf = 3.2;
+            Board[] boards = new Board[] {
+                new Board("A", 2100, 193),
+                new Board("B", 2100, 150),
+                new Board("C", 2100, 143),
+                new Board("D", 2100, 170),
+                new Board("E", 2100, 185),
+                new Board("F", 2100, 210),
+                new Board("G", 2100, 135),
+                new Board("H", 2100, 225),
+            };
+            Part[] parts = new Part[] {
+                new Part("001", 1721.7, 100.0),
+                new Part("002", 284.5, 100.0),
+                new Part("003", 1721.7, 100.0),
+                new Part("004", 284.5, 100.0),
+                new Part("005", 955.0, 69.3),
+                new Part("006", 955.0, 60.0),
+                new Part("007", 955.0, 69.6),
+                new Part("008", 955.0, 80.0),
+                new Part("009", 955.0, 60.0),
+                new Part("010", 955.0, 60.0),
+                new Part("011", 310.0, 100.0),
+                new Part("012", 310.0, 100.0),
+                new Part("013", 310.0, 36.0),
+                new Part("014", 310.0, 36.0),
+                new Part("015", 354.5, 36.0),
+                new Part("016", 354.5, 36.0),
+                new Part("017", 299.0, 20.0),
+                new Part("018", 299.0, 20.0),
+                new Part("019", 299.0, 20.0),
+                new Part("020", 299.0, 20.0),
+                new Part("021", 327.5, 20.0),
+                new Part("022", 327.5, 20.0),
+                new Part("023", 955.0, 80.0),
+                new Part("024", 310.0, 100.0),
+                new Part("025", 310.0, 100.0),
+                new Part("026", 310.0, 36.0),
+                new Part("027", 310.0, 36.0),
+                new Part("028", 354.5, 36.0),
+                new Part("029", 354.5, 36.0),
+                new Part("030", 299.0, 20.0),
+                new Part("031", 327.5, 20.0),
+                new Part("032", 327.5, 20.0),
+                new Part("033", 955.0, 80.0),
+                new Part("034", 310.0, 100.0),
+                new Part("035", 310.0, 100.0),
+                new Part("036", 310.0, 36.0),
+                new Part("037", 310.0, 36.0),
+                new Part("038", 354.5, 36.0),
+                new Part("039", 354.5, 36.0),
+                new Part("040", 299.0, 20.0),
+                new Part("041", 327.5, 20.0),
+                new Part("042", 327.5, 20.0),
+                new Part("043", 955.0, 80.0),
+                new Part("044", 310.0, 100.0),
+                new Part("045", 310.0, 100.0),
+                new Part("046", 310.0, 36.0),
+                new Part("047", 310.0, 36.0),
+                new Part("048", 354.5, 36.0),
+                new Part("049", 354.5, 36.0),
+                new Part("050", 299.0, 20.0),
+            };
 
-
-            BoardList boards = new BoardList(
-                //new BoardNode("A", 2100, 193),
-                //new BoardNode("B", 2100, 150),
-                //new BoardNode("C", 2100, 143),
-                //new BoardNode("D", 2100, 170),
-                //new BoardNode("E", 2100, 185),
-                new BoardNode("F", 2100, 210),
-                //new BoardNode("G", 2100, 135),
-                //new BoardNode("H", 2100, 225),
-                null
-            );
-
-            PartList parts = new PartList(
-                new PartNode("001", 1721.7, 100.0),
-                new PartNode("002", 284.5, 100.0),
-                new PartNode("003", 1721.7, 100.0),
-                new PartNode("004", 284.5, 100.0),
-                new PartNode("005", 955.0, 69.3),
-                new PartNode("006", 955.0, 60.0),
-                new PartNode("007", 955.0, 69.6),
-                new PartNode("008", 955.0, 80.0),
-                new PartNode("009", 955.0, 60.0),
-                new PartNode("010", 955.0, 60.0),
-                new PartNode("011", 310.0, 100.0),
-                new PartNode("012", 310.0, 100.0),
-                new PartNode("013", 310.0, 36.0),
-                new PartNode("014", 310.0, 36.0),
-                new PartNode("015", 354.5, 36.0),
-                new PartNode("016", 354.5, 36.0),
-                new PartNode("017", 299.0, 20.0),
-                new PartNode("018", 299.0, 20.0),
-                new PartNode("019", 299.0, 20.0),
-                new PartNode("020", 299.0, 20.0),
-                new PartNode("021", 327.5, 20.0),
-                new PartNode("022", 327.5, 20.0),
-                //new PartNode("023", 955.0, 80.0),
-                //new PartNode("024", 310.0, 100.0),
-                //new PartNode("025", 310.0, 100.0),
-                //new PartNode("026", 310.0, 36.0),
-                //new PartNode("027", 310.0, 36.0),
-                //new PartNode("028", 354.5, 36.0),
-                //new PartNode("029", 354.5, 36.0),
-                //new PartNode("030", 299.0, 20.0),
-                //new PartNode("031", 327.5, 20.0),
-                //new PartNode("032", 327.5, 20.0),
-                //new PartNode("033", 955.0, 80.0),
-                //new PartNode("034", 310.0, 100.0),
-                //new PartNode("035", 310.0, 100.0),
-                //new PartNode("036", 310.0, 36.0),
-                //new PartNode("037", 310.0, 36.0),
-                //new PartNode("038", 354.5, 36.0),
-                //new PartNode("039", 354.5, 36.0),
-                //new PartNode("040", 299.0, 20.0),
-                //new PartNode("041", 327.5, 20.0),
-                //new PartNode("042", 327.5, 20.0),
-                //new PartNode("043", 955.0, 80.0),
-                //new PartNode("044", 310.0, 100.0),
-                //new PartNode("045", 310.0, 100.0),
-                //new PartNode("046", 310.0, 36.0),
-                //new PartNode("047", 310.0, 36.0),
-                //new PartNode("048", 354.5, 36.0),
-                //new PartNode("049", 354.5, 36.0),
-                //new PartNode("050", 299.0, 20.0),
-                null
-                );
             if (args[0].StartsWith("-clp:"))
             {
                 string path = args[0].Replace("-clp:", "");
@@ -208,85 +201,78 @@ namespace WoodFitting2
             }
             #endregion
 
-            //PartNode[] partsarray = parts.ToArray;
-            //List<PartNode> partsList = new List<PartNode>(partsarray);
-            //Stopwatch swt = new Stopwatch();
-            //swt.Start();
-            //for (int i = 0; i < 120000000; i++)
-            //{
-            //    //Array
-            //    PartNode iPart;
-            //    for (int j = 0; j < partsarray.Length; j++) { iPart = partsarray[j]; }
-
-            //    //linked list
-            //    //for (var iPart = parts.Head; iPart != null; iPart = iPart.Next) ;
-
-            //    //List
-            //    //foreach (var iPart in partsList) ;
-            //    //PartNode iPart;
-            //    //for (int j = 0; j < partsList.Count; j++) iPart = partsList[j];
-            //}
-            //swt.Stop();
-            //Trace.WriteLine(swt.ElapsedMilliseconds);
-
-
             #region // Print starting parameters ...
             Trace.WriteLine($"Packing started @ {DateTime.Now} with the following:");
-            Trace.WriteLine($"------------------------------------------------");
-            Trace.WriteLine($"  Board margins (w x l) : {boardMargins_Width} mm x {boardMargins_length} mm");
+            Trace.WriteLine($"-----------------------------------------------------");
             Trace.WriteLine($"  Part padding  (w x l) : {PartPadding_Width} mm x {PartPadding_Length} mm");
             Trace.WriteLine($"  Saw blade kerf        : {SawKerf} mm");
-            Trace.WriteLine($"  {boards.Count} Boards:");
-            for (BoardNode iBoard = boards.Head; iBoard != null; iBoard = iBoard.Next)
-                Trace.WriteLine($"{iBoard.ID,6} [{iBoard.Length,7:0.0} x {iBoard.Width,5:0.0}]");
-            Trace.WriteLine($"  {parts.Count} Parts:");
-            for (PartNode iPart = parts.Head; iPart != null; iPart = iPart.Next)
-                Trace.WriteLine($"{iPart.ID,6} [{iPart.Length,7:0.0} x {iPart.Width,5:0.0}]");
+            Trace.WriteLine($"  {boards.Length} Boards:");
+            for (int i = 0; i < boards.Length; i++)
+                Trace.WriteLine($"{boards[i].ID,6} [{boards[i].Length,7:0.0} x {boards[i].Width,5:0.0}]");
+            Trace.WriteLine($"  {parts.Length} Parts:");
+            for (int i = 0; i < parts.Length; i++)
+                Trace.WriteLine($"{parts[i].ID,6} [{parts[i].Length,7:0.0} x {parts[i].Width,5:0.0}]");
             #endregion
 
             #region // Find the solution ...
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            var solution = Packer.Pack(parts, boards,
+            Packer.Pack(parts, boards,
                 sawkerf: SawKerf,
-                boardMarginLength: boardMargins_length,
-                boardMarginWidth: boardMargins_Width,
                 partPaddingLength: PartPadding_Length,
                 partPaddingWidth: PartPadding_Width);
             sw.Stop();
             #endregion
 
             #region // Print the solution ...
-            // calculate the total area of all used boards
-            List<string> usedBoardIDs = solution.ToArray.Select(t => t.Container).Distinct().ToList();
-            double UsedStockArea = boards.ToArray.Where(q => usedBoardIDs.Contains(q.ID)).Sum(t => t.Area);
-
             Trace.WriteLine("Solution:");
             Trace.WriteLine("----------------");
-            if (solution.Count < parts.Count)
+            if (parts.Any(t=>!t.Packed))
                 Trace.WriteLine("WARNING: All parts could not be placed!\r\n");
 
-            for (var iBoard = boards.Head; iBoard != null; iBoard = iBoard.Next)
+            // loop through all boards and print packed parts, while colating some totals
+            double UsedStockArea = 0;
+            int UsedStockCount = 0;
+            double TotalStockArea = 0;
+            int TotalPackedPartsCount = 0;
+            double UsedPartsArea = 0;
+            for (int i = 0; i < boards.Length; i++)
             {
-                if (iBoard.Solution == null)
+                Board iBoard = boards[i];
+                TotalStockArea += iBoard.Area;
+
+                if (iBoard.PackedParts == null)
                     Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] : not used.");
                 else
-                    Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] ({(iBoard.Solution == null ? 0 : iBoard.Solution.TotalArea / iBoard.Area):00.0 %}) :\r\n{iBoard.Solution?.ToString()}");
+                {
+                    UsedStockArea += iBoard.Area;
+                    UsedStockCount++;
+                    Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] ({(iBoard.PackedParts == null ? 0 : iBoard.PackedArea / iBoard.Area):00.0 %}) :");
+                    UsedPartsArea += iBoard.PackedArea;
+                    TotalPackedPartsCount += iBoard.PartsCount;
+                    for (int j = 0; j < iBoard.PartsCount; j++)
+                        Trace.WriteLine($"{iBoard.PackedParts?[j].ID,10} [{iBoard.PackedParts?[j].Length,7:0.0} x {iBoard.PackedParts?[j].Width,5:0.0}] @ ({iBoard.PartdLengths[j],7:0.0},{iBoard.PartdWidths[j],7:0.0})");
+                }
             }
+
+            double TotalPartsArea = 0;
+            for (int i = 0; i < parts.Length; i++)
+                TotalPartsArea += parts[i].Area;
+            
             Trace.WriteLine("===========================================================");
             Trace.WriteLine("Solution summary");
             Trace.WriteLine("----------------");
             Trace.WriteLine($"   Processing time: {sw.ElapsedMilliseconds,5:0} ms");
-            Trace.WriteLine($"   Boards         : {boards.Count,5:0}    ({boards.TotalArea / 1000000,6:0.000} m\u00b2)");
-            Trace.WriteLine($"   Used boards    : {usedBoardIDs.Count,5:0}    ({UsedStockArea / 1000000,6:0.000} m\u00b2)");
-            Trace.WriteLine($"   Parts          : {parts.Count,5:0}    ({parts.TotalArea / 1000000,6:0.000} m\u00b2)");
-            Trace.WriteLine($"   Placed parts   : {solution.Count,5:0}    ({solution.TotalArea / 1000000,6:0.000} m\u00b2)");
-            Trace.WriteLine($"   Waste          : {(UsedStockArea - solution.TotalArea) / UsedStockArea,7:0.0 %}  ({(UsedStockArea - solution.TotalArea) / 1000000,6:0.000} m\u00b2)");
-            Trace.WriteLine($"   Coverage       : {solution.TotalArea / UsedStockArea,7:0.0 %}  ({(solution.TotalArea) / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Boards         : {boards.Length,5:0}    ({TotalStockArea / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Used boards    : {UsedStockCount,5:0}    ({UsedStockArea / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Parts          : {parts.Length,5:0}    ({TotalPartsArea / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Placed parts   : {TotalPackedPartsCount,5:0}    ({UsedPartsArea / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Waste          : {(UsedStockArea - UsedPartsArea) / UsedStockArea,7:0.0 %}  ({(UsedStockArea - UsedPartsArea) / 1000000,6:0.000} m\u00b2)");
+            Trace.WriteLine($"   Coverage       : {UsedPartsArea / UsedStockArea,7:0.0 %}  ({UsedPartsArea / 1000000,6:0.000} m\u00b2)");
             #endregion
 
             #region // Draw solution to an image ...
-            Bitmap bmp = Draw(boards, solution);
+            Bitmap bmp = Draw(boards);
             bmp.Save("out.bmp");
             Console.WriteLine("Launch output image (Y/N):");
             string s = Console.ReadLine();

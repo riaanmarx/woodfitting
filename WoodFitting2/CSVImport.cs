@@ -60,7 +60,7 @@ namespace WoodFitting2
             public string Width { get; set; }
         }
 
-        public static void FromCutlistPlusCSV(string filePath, out PartList parts, out BoardList boards)
+        public static void FromCutlistPlusCSV(string filePath, out Part[] parts, out Board[] boards)
         {
             CsvFileDescription inputFileDescription = new CsvFileDescription
             {
@@ -74,17 +74,19 @@ namespace WoodFitting2
             IEnumerable<CutListPlusCSVRecord> records = new List<CutListPlusCSVRecord>( 
                 cc.Read<CutListPlusCSVRecord>(filePath, inputFileDescription));
 
-            parts = new PartList();
-            boards = new BoardList();
+            List<Part> tmpParts = new List<Part>();
+            List<Board> tmpBoards = new List<Board>();
             foreach (var iline in records.Where(t=>t.PartNumber!="Part #"))
                 if(iline.MaterialName == "Stock")
-                    boards.Append(new BoardNode(iline.PartName, double.Parse(iline.Length.Replace("mm", "")), double.Parse(iline.Width.Replace("mm", ""))));
+                    tmpBoards.Add(new Board(iline.PartName, double.Parse(iline.Length.Replace("mm", "")), double.Parse(iline.Width.Replace("mm", ""))));
                 else
-                    parts.Append(new PartNode(iline.PartName, double.Parse(iline.Length.Replace("mm", "")), double.Parse(iline.Width.Replace("mm", ""))));
-            
+                    tmpParts.Add(new Part(iline.PartName, double.Parse(iline.Length.Replace("mm", "")), double.Parse(iline.Width.Replace("mm", ""))));
+
+            parts = tmpParts.ToArray();
+            boards = tmpBoards.ToArray();
         }
 
-        internal static void FromCSV(string path, out PartList parts, out BoardList boards)
+        internal static void FromCSV(string path, out Part[] parts, out Board[] boards)
         {
             CsvFileDescription inputFileDescription = new CsvFileDescription
             {
@@ -98,13 +100,15 @@ namespace WoodFitting2
             IEnumerable<CSVRecord> records = new List<CSVRecord>(
                 cc.Read<CSVRecord>(path, inputFileDescription));
 
-            parts = new PartList();
-            boards = new BoardList();
+            List<Part> tmpParts = new List<Part>();
+            List<Board> tmpBoards = new List<Board>();
             foreach (var iline in records.Where(t => !t.ItemType.StartsWith("#")))
                 if (iline.ItemType.ToLower() == "board")
-                    boards.Append(new BoardNode(iline.PartID, double.Parse(iline.Length), double.Parse(iline.Width)));
+                    tmpBoards.Add(new Board(iline.PartID, double.Parse(iline.Length), double.Parse(iline.Width)));
                 else
-                    parts.Append(new PartNode(iline.PartID, double.Parse(iline.Length), double.Parse(iline.Width)));
+                    tmpParts.Add(new Part(iline.PartID, double.Parse(iline.Length), double.Parse(iline.Width)));
+            parts = tmpParts.ToArray();
+            boards = tmpBoards.ToArray();
         }
     }
 }
