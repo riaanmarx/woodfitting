@@ -57,11 +57,11 @@ namespace WoodFitting2
                 // loop through all the parts and draw the ones on the current board
                 string overflowtext = "";
                 //for (Part iPlacement = parts.Head; iPlacement != null; iPlacement = iPlacement.Next)
-                for (int i = 0; i < iBoard.PartsCount; i++)
+                for (int i = 0; i < iBoard.PackedPartsCount; i++)
                 {
                     Part iPlacement = iBoard.PackedParts[i];
-                    double dLength = iBoard.PartdLengths[i];
-                    double dWidth = iBoard.PartdWidths[i];
+                    double dLength = iBoard.PackedPartdLengths[i];
+                    double dWidth = iBoard.PackedPartdWidths[i];
 
                     // draw the part
                     g.FillRectangle(Brushes.Green, (float)(xOffset + dWidth), (float)(dLength + yMargin), (float)iPlacement.Width, (float)iPlacement.Length);
@@ -121,90 +121,44 @@ namespace WoodFitting2
         static void Main(string[] args)
         {
             #region // Gather the inputs to the solution ...
-            double PartPadding_Length = 0;
-            double PartPadding_Width = 0;
+            double partLengthPadding = 0;
+            double partWidthPadding = 0;
             double SawKerf = 3.2;
-            Board[] boards = new Board[] {
-                new Board("A", 2100, 193),
-                new Board("B", 2100, 150),
-                new Board("C", 2100, 143),
-                new Board("D", 2100, 170),
-                new Board("E", 2100, 185),
-                new Board("F", 2100, 210),
-                new Board("G", 2100, 135),
-                new Board("H", 2100, 225),
-            };
-            Part[] parts = new Part[] {
-                new Part("001", 1721.7, 100.0),
-                new Part("002", 284.5, 100.0),
-                new Part("003", 1721.7, 100.0),
-                new Part("004", 284.5, 100.0),
-                new Part("005", 955.0, 69.3),
-                new Part("006", 955.0, 60.0),
-                new Part("007", 955.0, 69.6),
-                new Part("008", 955.0, 80.0),
-                new Part("009", 955.0, 60.0),
-                new Part("010", 955.0, 60.0),
-                new Part("011", 310.0, 100.0),
-                new Part("012", 310.0, 100.0),
-                new Part("013", 310.0, 36.0),
-                new Part("014", 310.0, 36.0),
-                new Part("015", 354.5, 36.0),
-                new Part("016", 354.5, 36.0),
-                new Part("017", 299.0, 20.0),
-                new Part("018", 299.0, 20.0),
-                new Part("019", 299.0, 20.0),
-                new Part("020", 299.0, 20.0),
-                new Part("021", 327.5, 20.0),
-                new Part("022", 327.5, 20.0),
-                new Part("023", 955.0, 80.0),
-                new Part("024", 310.0, 100.0),
-                new Part("025", 310.0, 100.0),
-                new Part("026", 310.0, 36.0),
-                new Part("027", 310.0, 36.0),
-                new Part("028", 354.5, 36.0),
-                new Part("029", 354.5, 36.0),
-                new Part("030", 299.0, 20.0),
-                new Part("031", 327.5, 20.0),
-                new Part("032", 327.5, 20.0),
-                new Part("033", 955.0, 80.0),
-                new Part("034", 310.0, 100.0),
-                new Part("035", 310.0, 100.0),
-                new Part("036", 310.0, 36.0),
-                new Part("037", 310.0, 36.0),
-                new Part("038", 354.5, 36.0),
-                new Part("039", 354.5, 36.0),
-                new Part("040", 299.0, 20.0),
-                new Part("041", 327.5, 20.0),
-                new Part("042", 327.5, 20.0),
-                new Part("043", 955.0, 80.0),
-                new Part("044", 310.0, 100.0),
-                new Part("045", 310.0, 100.0),
-                new Part("046", 310.0, 36.0),
-                new Part("047", 310.0, 36.0),
-                new Part("048", 354.5, 36.0),
-                new Part("049", 354.5, 36.0),
-                new Part("050", 299.0, 20.0),
-            };
 
-            if (args[0].StartsWith("-clp:"))
+            Board[] boards = new Board[] { };
+            Part[] parts = new Part[] { };
+            for (int i = 0; i < args.Length; i++)
             {
-                string path = args[0].Replace("-clp:", "");
-                if (System.IO.File.Exists(path))
-                    Import.FromCutlistPlusCSV(path, out parts, out boards);
-            }
-            if (args[0].StartsWith("-csv:"))
-            {
-                string path = args[0].Replace("-csv:", "");
-                if (System.IO.File.Exists(path))
-                    Import.FromCSV(path, out parts, out boards);
+                if (args[i].StartsWith("-clp:"))
+                {
+                    string path = args[i].Replace("-clp:", "");
+                    if (System.IO.File.Exists(path))
+                        Import.FromCutlistPlusCSV(path, out parts, out boards);
+                }
+                if (args[i].StartsWith("-csv:"))
+                {
+                    string path = args[i].Replace("-csv:", "");
+                    if (System.IO.File.Exists(path))
+                        Import.FromCSV(path, out parts, out boards);
+                }
+                if (args[i].StartsWith("-kerf:"))
+                {
+                    string kerfarg = args[i].Replace("-kerf:", "");
+                    SawKerf = double.Parse(kerfarg);
+                }
+                if (args[i].StartsWith("-pad:"))
+                {
+                    string[] padding = args[i].Replace("-pad:", "").Split(',');
+                    partLengthPadding = double.Parse(padding[0]);
+                    partWidthPadding = double.Parse(padding[1]);
+                }
             }
             #endregion
 
             #region // Print starting parameters ...
-            Trace.WriteLine($"Packing started @ {DateTime.Now} with the following:");
-            Trace.WriteLine($"-----------------------------------------------------");
-            Trace.WriteLine($"  Part padding  (w x l) : {PartPadding_Width} mm x {PartPadding_Length} mm");
+            Trace.WriteLine($"Packing started with the following:");
+            Trace.WriteLine($"-----------------------------------");
+            Trace.WriteLine($"  Part padding  (w x l) : {partWidthPadding} mm x {partLengthPadding} mm");
             Trace.WriteLine($"  Saw blade kerf        : {SawKerf} mm");
             Trace.WriteLine($"  {boards.Length} Boards:");
             for (int i = 0; i < boards.Length; i++)
@@ -212,23 +166,28 @@ namespace WoodFitting2
             Trace.WriteLine($"  {parts.Length} Parts:");
             for (int i = 0; i < parts.Length; i++)
                 Trace.WriteLine($"{parts[i].ID,6} [{parts[i].Length,7:0.0} x {parts[i].Width,5:0.0}]");
+            Trace.WriteLine("===========================================================");
             #endregion
 
             #region // Find the solution ...
+            Trace.WriteLine($"Processing ... \r\n");
             Stopwatch sw = new Stopwatch();
             sw.Start();
             Packer.Pack(parts, boards,
                 sawkerf: SawKerf,
-                partPaddingLength: PartPadding_Length,
-                partPaddingWidth: PartPadding_Width);
+                partLengthPadding: partLengthPadding,
+                partWidthPadding: partWidthPadding);
             sw.Stop();
+            if (parts.Any(t => !t.isPacked))
+                Trace.WriteLine("Processing completed with WARNING: All parts could not be placed!\r\n");
+            else
+                Trace.WriteLine($"Processing completed succesfully.\r\n");
+            Trace.WriteLine("===========================================================");
             #endregion
 
             #region // Print the solution ...
-            Trace.WriteLine("Solution:");
+            Trace.WriteLine("Solution detail:");
             Trace.WriteLine("----------------");
-            if (parts.Any(t=>!t.Packed))
-                Trace.WriteLine("WARNING: All parts could not be placed!\r\n");
 
             // loop through all boards and print packed parts, while colating some totals
             double UsedStockArea = 0;
@@ -247,21 +206,21 @@ namespace WoodFitting2
                 {
                     UsedStockArea += iBoard.Area;
                     UsedStockCount++;
-                    Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] ({(iBoard.PackedParts == null ? 0 : iBoard.PackedArea / iBoard.Area):00.0 %}) :");
-                    UsedPartsArea += iBoard.PackedArea;
-                    TotalPackedPartsCount += iBoard.PartsCount;
-                    for (int j = 0; j < iBoard.PartsCount; j++)
-                        Trace.WriteLine($"{iBoard.PackedParts?[j].ID,10} [{iBoard.PackedParts?[j].Length,7:0.0} x {iBoard.PackedParts?[j].Width,5:0.0}] @ ({iBoard.PartdLengths[j],7:0.0},{iBoard.PartdWidths[j],7:0.0})");
+                    Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] ({(iBoard.PackedParts == null ? 0 : iBoard.PackedPartsTotalArea / iBoard.Area):00.0 %}) :");
+                    UsedPartsArea += iBoard.PackedPartsTotalArea;
+                    TotalPackedPartsCount += iBoard.PackedPartsCount;
+                    for (int j = 0; j < iBoard.PackedPartsCount; j++)
+                        Trace.WriteLine($"{iBoard.PackedParts?[j].ID,10} [{iBoard.PackedParts?[j].Length,7:0.0} x {iBoard.PackedParts?[j].Width,5:0.0}] @ ({iBoard.PackedPartdLengths[j],7:0.0},{iBoard.PackedPartdWidths[j],7:0.0})");
                 }
             }
 
             double TotalPartsArea = 0;
             for (int i = 0; i < parts.Length; i++)
                 TotalPartsArea += parts[i].Area;
-            
+
             Trace.WriteLine("===========================================================");
-            Trace.WriteLine("Solution summary");
-            Trace.WriteLine("----------------");
+            Trace.WriteLine("Solution summary:");
+            Trace.WriteLine("----------------_");
             Trace.WriteLine($"   Processing time: {sw.ElapsedMilliseconds,5:0} ms");
             Trace.WriteLine($"   Boards         : {boards.Length,5:0}    ({TotalStockArea / 1000000,6:0.000} m\u00b2)");
             Trace.WriteLine($"   Used boards    : {UsedStockCount,5:0}    ({UsedStockArea / 1000000,6:0.000} m\u00b2)");
@@ -274,10 +233,10 @@ namespace WoodFitting2
             #region // Draw solution to an image ...
             Bitmap bmp = Draw(boards);
             bmp.Save("out.bmp");
-            Console.WriteLine("Launch output image (Y/N):");
-            string s = Console.ReadLine();
-            if (s.ToLower() == "y")
-                Process.Start("out.bmp");
+            //Console.WriteLine("Launch output image (Y/N):");
+            //string s = Console.ReadLine();
+            //if (s.ToLower() == "y")
+            Process.Start("out.bmp");
             #endregion
         }
     }
