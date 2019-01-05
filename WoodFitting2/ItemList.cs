@@ -12,7 +12,7 @@ namespace WoodFitting2
         public string ID;
         public double Width;
         public double Length;
-        public double Area;
+        public double Area => Width * Length;
 
         public bool isPacked;
 
@@ -21,7 +21,6 @@ namespace WoodFitting2
             ID = id;
             Length = length;
             Width = width;
-            Area = Length * Width;
         }
 
         public override string ToString()
