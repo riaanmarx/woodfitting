@@ -153,7 +153,13 @@ namespace WoodFitting2
                     partWidthPadding = double.Parse(padding[1]);
                 }
             }
+
+
+
             #endregion
+
+            //Array.Resize<Part>(ref parts, 20);
+            //Array.Resize<Board>(ref boards, 1);
 
             #region // Print starting parameters ...
             Trace.WriteLine($"Packing started with the following:");
@@ -234,9 +240,10 @@ namespace WoodFitting2
             Bitmap bmp = Draw(boards);
             bmp.Save("out.bmp");
             //Console.WriteLine("Launch output image (Y/N):");
-            //string s = Console.ReadLine();
+            
             //if (s.ToLower() == "y")
             Process.Start("out.bmp");
+            string s = Console.ReadLine();
             #endregion
         }
     }
