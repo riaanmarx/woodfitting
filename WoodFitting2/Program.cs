@@ -49,7 +49,7 @@ namespace WoodFitting2
             foreach (var iBoard in boardsToDraw)
             {
                 // draw the board
-                g.FillRectangle(Brushes.DarkRed, (float)(xOffset), (float)yMargin, (float)iBoard.Width, (float)iBoard.Length);
+                g.FillRectangle(Brushes.White, (float)(xOffset), (float)yMargin, (float)iBoard.Width, (float)iBoard.Length);
                 string boardheader = $"{iBoard.ID} [{iBoard.Length}x{iBoard.Width}]";
                 SizeF textSizeBoard = g.MeasureString(boardheader, boardFont);
                 g.DrawString(boardheader, boardFont, Brushes.White, (float)(xOffset + iBoard.Width / 2 - textSizeBoard.Width / 2), (float)(yMargin / 2 - textSizeBoard.Height / 2));
@@ -64,7 +64,7 @@ namespace WoodFitting2
                     double dWidth = iBoard.PackedPartdWidths[i];
 
                     // draw the part
-                    g.FillRectangle(Brushes.Green, (float)(xOffset + dWidth), (float)(dLength + yMargin), (float)iPlacement.Width, (float)iPlacement.Length);
+                    g.FillRectangle(new SolidBrush(Color.FromArgb(150 ,Color.Green)), (float)(xOffset + dWidth), (float)(dLength + yMargin), (float)iPlacement.Width, (float)iPlacement.Length);
 
                     // print the part text
                     string text1 = $"{iPlacement.ID} [{iPlacement.Length} x {iPlacement.Width}]";
@@ -114,7 +114,7 @@ namespace WoodFitting2
             }
 
             g.Flush();
-            bitmap.RotateFlip(RotateFlipType.Rotate90FlipNone);
+           // bitmap.RotateFlip(RotateFlipType.Rotate90FlipNone);
             return bitmap;
         }
 
@@ -179,10 +179,14 @@ namespace WoodFitting2
             Trace.WriteLine($"Processing ... \r\n");
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            Packer.Pack(parts, boards,
+            Packer2.Pack(parts, boards,
                 sawkerf: SawKerf,
                 partLengthPadding: partLengthPadding,
                 partWidthPadding: partWidthPadding);
+            //Packer.Pack(parts, boards,
+            //    sawkerf: SawKerf,
+            //    partLengthPadding: partLengthPadding,
+            //    partWidthPadding: partWidthPadding);
             sw.Stop();
             if (parts.Any(t => !t.isPacked))
                 Trace.WriteLine("Processing completed with WARNING: All parts could not be placed!\r\n");
@@ -239,11 +243,11 @@ namespace WoodFitting2
             #region // Draw solution to an image ...
             Bitmap bmp = Draw(boards);
             bmp.Save("out.bmp");
-            //Console.WriteLine("Launch output image (Y/N):");
-            
-            //if (s.ToLower() == "y")
-            Process.Start("out.bmp");
+            Console.WriteLine("Launch output image (Y/N):");
             string s = Console.ReadLine();
+
+            if (s.ToLower() == "y")
+            Process.Start("out.bmp");
             #endregion
         }
     }

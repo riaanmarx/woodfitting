@@ -115,8 +115,10 @@ namespace WoodFitting2.Packer_v1
             int packedBoardsCount = 0;
 
             // repeat until all parts are placed, or all boards packed
+            int iteration = 0;
             while (packedPartsCount < partsCount && packedBoardsCount < boardsCount)
             {
+                iteration++;
                 Task[] threads = new Task[boardsCount];
                 for (int i = 0; i < boardsCount; i++)
                 {
@@ -125,6 +127,7 @@ namespace WoodFitting2.Packer_v1
                         // reference board[i]
                         Board iBoard = orderredBoards[(int)o];
                         if (iBoard.isComplete) return;
+                        //if (iBoard.ID != "B") return;
 
                         // init a packer object
                         Packer_internal iPacker = new Packer_internal()
@@ -137,27 +140,29 @@ namespace WoodFitting2.Packer_v1
                             BoardSectionsCount = 1,
                             CurrentSolution = new Part[partsCount],
                             CurrentSolutionDLengths = new double[partsCount],
-                            CurrentSolutionDWidths = new double[partsCount]
+                            CurrentSolutionDWidths = new double[partsCount],
+                            iteration = iteration
                         };
                         iPacker.BoardSections[0] = new Board(iBoard.ID, iBoard.Length, iBoard.Width, iBoard.dLength, iBoard.dWidth);
 
                         // pack the board recursively, starting at the first part and an empty solution
-                        iPacker.StartPacking(0);
+                        iPacker.StartPacking(partsCount-1);
 
-                        //StringBuilder sb = new StringBuilder();
-                        //sb.AppendLine($"board packed: {iBoard}");
-                        //for (int j = 0; j < iBoard.PackedPartsCount; j++)
-                        //    sb.AppendLine($"   {iBoard.PackedParts[j]} @ ({iBoard.PackedPartdLengths[j]}, {iBoard.PackedPartdWidths[j]})");
-                        //Trace.WriteLine(sb.ToString());
+                        StringBuilder sb = new StringBuilder();
+                        sb.AppendLine($"board packed: {iBoard} ({iBoard.PackedPartsTotalArea / iBoard.Area * 100:0.0}%)");
+                        for (int j = 0; j < iBoard.PackedPartsCount; j++)
+                            sb.AppendLine($"   {iBoard.PackedParts[j]} @ ({iBoard.PackedPartdLengths[j]}, {iBoard.PackedPartdWidths[j]})");
+                        Trace.WriteLine(sb.ToString());
                     }, i);
                 }
                 Task.WaitAll(threads);
 
                 // Find the best packed board from this iteration
                 IEnumerable<Board> incompleteBoards = orderredBoards.Where(q => !q.isComplete);
-                Board[] PackedBestCoverredBoards = incompleteBoards.OrderByDescending(t => t.PackedPartsTotalArea / t.Area).ToArray();
+                Board[] PackedBestCoverredBoards = incompleteBoards.Where(q => q.PackedParts != null).OrderByDescending(t => t.PackedPartsTotalArea / t.Area).ToArray();
 
                 Trace.WriteLine($"---------------------------------------------");
+                Trace.WriteLine($"best board(s) for iteration:");
 
                 // If no board could be packed, exit
                 if (PackedBestCoverredBoards.Length == 0)
@@ -166,7 +171,6 @@ namespace WoodFitting2.Packer_v1
                 // loop through boards
                 for (int iPacked = 0; iPacked < PackedBestCoverredBoards.Length; iPacked++)
                 {
-                    Trace.WriteLine($"best board(s) for iteration:");
                     Board iBestCoverredBoard = PackedBestCoverredBoards[iPacked];
                     // if non of te parts packed on the board have been packed on a previous board
                     if (!iBestCoverredBoard.PackedParts.Any(t => t?.isPacked??false))
@@ -200,8 +204,12 @@ namespace WoodFitting2.Packer_v1
                         iBestCoverredBoard.PackedPartsTotalArea = 0;
                     }
                 }
-
+                Trace.WriteLine($"=============================================");
             }
+
+            // remove padding to all parts
+            if (partLengthPadding > 0 || partWidthPadding > 0)
+                orderredParts.ToList().ForEach(t => t.Inflate(-partWidthPadding, -partLengthPadding));
         }
 
         private class Packer_internal
@@ -220,6 +228,9 @@ namespace WoodFitting2.Packer_v1
             public double CurrentSolutionTotalArea;
 
             public double sawkerf;
+            internal int iteration=0;
+            public int cn = 0;
+
 
             public void StartPacking(int iStart)
             {
@@ -228,19 +239,20 @@ namespace WoodFitting2.Packer_v1
 
 
                 // loop through the parts, from big to small
-                for (int i = iStart; i < PartsCount; i++)
+                for (int i = iStart; i >= 0; i--)
                 {
                     Part iPart = Parts[i];
 
                     #region // check if the part is a viable candidate ...
                     // ignore parts already packed on a board in a previous iteration
                     if (iPart.isPacked) continue;
+                    if (CurrentSolution.Contains(iPart)) continue;
                     // ignore parts larger than the largest board section
-                    if (iPart.Area > Board.Area) break;
+                    //if (iPart.Area > Board.Area) break;
                     // short-circuit repeat parts
                     if (iPart.Length == lastPartLength && iPart.Width == lastPartWidth) continue;
                     // ignore parts already temporarily packed on this board in a previous recursion
-                    if (CurrentSolution.Contains(iPart)) continue;
+                    
 
                     lastPartLength = iPart.Length;
                     lastPartWidth = iPart.Width;
@@ -322,15 +334,13 @@ namespace WoodFitting2.Packer_v1
                     #endregion
 
                     #region // replace the used board with 2 overlapping remainder pieces after subtracting the part ...
-
-
                     // create new sections
                     Board boardSection1 = new Board(iBoardSection.ID, iBoardSection.Length - iPart.Length - sawkerf, iBoardSection.Width, iBoardSection.dLength + iPart.Length + sawkerf, iBoardSection.dWidth);
                     Board boardSection2 = new Board(iBoardSection.ID, iBoardSection.Length, iBoardSection.Width - iPart.Width - sawkerf, iBoardSection.dLength, iBoardSection.dWidth + iPart.Width + sawkerf);
                     boardSection1.AssociatedBoard = boardSection2;
                     boardSection2.AssociatedBoard = boardSection1;
-                    int boardSection1Index = BoardSectionsCount;
-                    int boardSection2Index = BoardSectionsCount;
+                    int boardSection1Index = 0;
+                    int boardSection2Index = 0;
 
                     if (boardSection1.Area > Parts[0].Area)
                     {
@@ -348,7 +358,7 @@ namespace WoodFitting2.Packer_v1
                     else
                     {
                         boardSection1 = null;
-                        boardSection1Index = BoardSectionsCount;
+                        boardSection1Index = BoardSectionsCount+999;
                         boardSection2.AssociatedBoard = null;
                     }
 
@@ -369,25 +379,26 @@ namespace WoodFitting2.Packer_v1
                     else
                     {
                         boardSection2 = null;
-                        boardSection2Index = BoardSectionsCount;
+                        boardSection2Index = BoardSectionsCount+999;
 
                         if (boardSection1 != null) boardSection1.AssociatedBoard = null;
                     }
 
                     #endregion
+#if DEBUG
+                    Drawboard_debug(
+                        Board,
+                        BoardSections, BoardSectionsCount,
+                        CurrentSolution, CurrentSolutionDLengths, CurrentSolutionDWidths, CurrentSolutionPartCount, CurrentSolutionTotalArea).Save($"dbgimages\\{Board.ID}_{cn++}.bmp");
+#endif
 
-                    //Drawboard_debug(
-                    //    Board,
-                    //    BoardSections, BoardSectionsCount,
-                    //    CurrentSolution, CurrentSolutionDLengths, CurrentSolutionDWidths, CurrentSolutionPartCount, CurrentSolutionTotalArea).Save($"dbgimages\\{Board.ID}_{cn++}.bmp");
-
-                    #region // pack the remaining parts on the remaining boards ...
+#region // pack the remaining parts on the remaining boards ...
                     // pack the remaining parts on the remaining boards
-                    if (i + 1 < PartsCount)
-                        StartPacking(i + 1);
-                    #endregion
+                    if (i > 0)
+                        StartPacking(i - 1);
+#endregion
 
-                    #region // undo the placement so we can iterate to the next part and test with it ...
+#region // undo the placement so we can iterate to the next part and test with it ...
 
                     // remove the remainder board sections we added...
                     if (boardSection2Index < BoardSectionsCount)
@@ -422,7 +433,7 @@ namespace WoodFitting2.Packer_v1
                     CurrentSolution[--CurrentSolutionPartCount] = null;
                     CurrentSolutionTotalArea -= iPart.Area;
 
-                    #endregion
+#endregion
                 }
 
             }
