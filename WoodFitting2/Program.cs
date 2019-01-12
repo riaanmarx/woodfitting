@@ -27,7 +27,7 @@ namespace WoodFitting2
             // create list of boards to draw
             List<Board> boardsToDraw = new List<Board>(boards);
             if (usedstockonly)
-                boardsToDraw = boards.Where(t => t.PackedParts != null).ToList();
+                boardsToDraw = boards.Where(t =>t.PackedPartsCount>0).ToList();
 
             // calculate width & height required for the bitmap
             foreach (var iBoard in boardsToDraw)
@@ -49,7 +49,7 @@ namespace WoodFitting2
             foreach (var iBoard in boardsToDraw)
             {
                 // draw the board
-                g.FillRectangle(Brushes.White, (float)(xOffset), (float)yMargin, (float)iBoard.Width, (float)iBoard.Length);
+                g.FillRectangle(Brushes.DarkRed, (float)(xOffset), (float)yMargin, (float)iBoard.Width, (float)iBoard.Length);
                 string boardheader = $"{iBoard.ID} [{iBoard.Length}x{iBoard.Width}]";
                 SizeF textSizeBoard = g.MeasureString(boardheader, boardFont);
                 g.DrawString(boardheader, boardFont, Brushes.White, (float)(xOffset + iBoard.Width / 2 - textSizeBoard.Width / 2), (float)(yMargin / 2 - textSizeBoard.Height / 2));
@@ -64,7 +64,7 @@ namespace WoodFitting2
                     double dWidth = iBoard.PackedPartdWidths[i];
 
                     // draw the part
-                    g.FillRectangle(new SolidBrush(Color.FromArgb(150 ,Color.Green)), (float)(xOffset + dWidth), (float)(dLength + yMargin), (float)iPlacement.Width, (float)iPlacement.Length);
+                    g.FillRectangle(new SolidBrush(Color.FromArgb(255 ,Color.Green)), (float)(xOffset + dWidth), (float)(dLength + yMargin), (float)iPlacement.Width, (float)iPlacement.Length);
 
                     // print the part text
                     string text1 = $"{iPlacement.ID} [{iPlacement.Length} x {iPlacement.Width}]";
@@ -158,7 +158,8 @@ namespace WoodFitting2
 
             #endregion
 
-            //Array.Resize<Part>(ref parts, 20);
+            Array.Resize<Part>(ref parts, 25);
+            //parts.First(t => t.ID == "002").Width = 999;
             //Array.Resize<Board>(ref boards, 1);
 
             #region // Print starting parameters ...
@@ -183,10 +184,12 @@ namespace WoodFitting2
                 sawkerf: SawKerf,
                 partLengthPadding: partLengthPadding,
                 partWidthPadding: partWidthPadding);
+
             //Packer.Pack(parts, boards,
             //    sawkerf: SawKerf,
             //    partLengthPadding: partLengthPadding,
             //    partWidthPadding: partWidthPadding);
+
             sw.Stop();
             if (parts.Any(t => !t.isPacked))
                 Trace.WriteLine("Processing completed with WARNING: All parts could not be placed!\r\n");
@@ -210,7 +213,7 @@ namespace WoodFitting2
                 Board iBoard = boards[i];
                 TotalStockArea += iBoard.Area;
 
-                if (iBoard.PackedParts == null)
+                if (iBoard.PackedPartsCount == 0)
                     Trace.WriteLine($"   Board {iBoard.ID} [{iBoard.Length,6:0.0} x {iBoard.Width,5:0.0}] : not used.");
                 else
                 {

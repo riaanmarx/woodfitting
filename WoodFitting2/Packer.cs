@@ -99,7 +99,6 @@ namespace WoodFitting2.Packer_v1
         /// <returns></returns>
         static public void Pack(Part[] parts, Board[] boards, double sawkerf = 3.2, double partLengthPadding = 0, double partWidthPadding = 0)
         {
-
             // order the parts and boards by Area, Ascending
             int partsCount = parts.Length;
             Part[] orderredParts = parts.OrderBy(t => t.Area).ToArray();
